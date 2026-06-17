@@ -1,9 +1,9 @@
-﻿// â”€â”€ Mock API Layer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+﻿// Mock API layer.
 // Async API with 80ms simulated latency. Swap function bodies for real fetch().
 
 const delay = (ms = 80) => new Promise(r => setTimeout(r, ms));
 
-// â”€â”€ Seed data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Seed data.
 export const hackathons = [
   {
     id: "1",
@@ -221,12 +221,12 @@ export const announcements = [
   { id: "a4", hackathon_id: "1", title: "API Rate Limits Increased",   message: "Chainlink and Alchemy API limits increased for all participants.",  priority: "info",    author: "Organizer", created_date: "2025-07-05T14:00:00" },
 ];
 
-// â”€â”€ Mutable in-memory stores â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Mutable in-memory stores.
 let _registrations = [...registrations];
 let _submissions   = [...submissions];
 let _announcements = [...announcements];
 
-// â”€â”€ Async Mock API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Async mock API.
 export const api = {
   hackathons: {
     list: async () => { await delay(); return [...hackathons]; },

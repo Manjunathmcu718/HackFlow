@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 
-// â”€â”€ Judge Assignment sub-component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Judge assignment sub-component.
 function JudgeAssignmentTab({ hackathon, submissions }) {
   const [showForm, setShowForm] = useState(false);
   const [assignments, setAssignments] = useState({});
@@ -133,7 +133,7 @@ function JudgeAssignmentTab({ hackathon, submissions }) {
   );
 }
 
-// â”€â”€ Main Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Main dashboard.
 export default function OrganizerDashboard() {
   const queryClient = useQueryClient();
   const [searchReg, setSearchReg]             = useState("");

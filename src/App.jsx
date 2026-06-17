@@ -1,5 +1,6 @@
 ﻿import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "sonner";
 import Landing from "./pages/Landing";
 import HackathonList from "./pages/HackathonList";
 import HackathonDetail from "./pages/HackathonDetail";
@@ -16,6 +17,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
+        <Toaster position="top-right" richColors />
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/hackathons" element={<HackathonList />} />
