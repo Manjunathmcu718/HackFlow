@@ -1,5 +1,6 @@
 ﻿import React from "react";
 import { Link } from "react-router-dom";
+import type { CSSProperties, ReactNode } from "react";
 import { api } from "@/lib/mockData";
 import { useQuery } from "@tanstack/react-query";
 import PageShell from "@/components/shared/PageShell";
@@ -9,7 +10,7 @@ import { Users, Copy, Send, Trophy, ExternalLink, Megaphone, BookOpen, Clock, Ar
 import { format } from "date-fns";
 import { toast } from "sonner";
 
-const LightCard = ({ children, className="", style={} }) => (
+const LightCard = ({ children, className="", style={} }: { children: ReactNode; className?: string; style?: CSSProperties }) => (
   <div className={`rounded-2xl ${className}`}
     style={{ background:"#fff",border:"1px solid rgba(26,31,60,.08)",boxShadow:"0 2px 12px rgba(0,0,0,.05)",...style }}>
     {children}
@@ -33,7 +34,7 @@ export default function ParticipantDashboard() {
   const leaderboardData = submissions.filter(s=>s.status==="submitted"&&s.average_score>0).sort((a,b)=>b.average_score-a.average_score);
   const myRank = leaderboardData.findIndex(s=>s.team_id===team?.id)+1;
 
-  const rankStyle = (i) => ({
+  const rankStyle = (i: number) => ({
     bg:    i===0?"rgba(245,158,11,.15)":i===1?"rgba(148,163,184,.15)":i===2?"rgba(249,115,22,.15)":"rgba(26,31,60,.07)",
     color: i===0?"#D97706":i===1?"#64748B":i===2?"#EA580C":"rgba(26,31,60,.5)",
   });

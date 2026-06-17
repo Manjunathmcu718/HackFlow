@@ -6,6 +6,16 @@ import CountdownTimer from "@/components/shared/CountdownTimer";
 import { Save, Send, Lock, Github, ExternalLink, Film, FileText, Plus, X, Check } from "lucide-react";
 import { toast } from "sonner";
 
+type ProjectForm = {
+  project_title: string;
+  description: string;
+  tech_stack: string[];
+  demo_url: string;
+  github_url: string;
+  pitch_deck_url: string;
+  video_url: string;
+};
+
 export default function SubmitProject() {
   const queryClient = useQueryClient();
   const { data: hackathons  = [] } = useQuery({ queryKey:["hackathons"],  queryFn:() => api.hackathons.list() });
@@ -17,7 +27,7 @@ export default function SubmitProject() {
   const existing       = submissions.find(s=>s.team_id===team?.id);
   const deadlinePassed = hackathon?.submission_deadline && new Date(hackathon.submission_deadline) < new Date();
 
-  const [form, setForm] = useState({ project_title:"", description:"", tech_stack:[], demo_url:"", github_url:"", pitch_deck_url:"", video_url:"" });
+  const [form, setForm] = useState<ProjectForm>({ project_title:"", description:"", tech_stack:[], demo_url:"", github_url:"", pitch_deck_url:"", video_url:"" });
   const [techInput, setTechInput]       = useState("");
   const [pitchFileName, setPitchFileName] = useState("");
   const [isSubmitted, setIsSubmitted]   = useState(false);
@@ -39,7 +49,7 @@ export default function SubmitProject() {
   }, [existing]);
 
   const saveDraft = useMutation({
-    mutationFn: async data => {
+    mutationFn: async (data: ProjectForm) => {
       if (existing) return api.submissions.update(existing.id,{...data,is_draft:true,status:"draft"});
       return api.submissions.create({...data,hackathon_id:hackathon?.id,team_id:team?.id,team_name:team?.name,track:team?.track,is_draft:true,status:"draft"});
     },
@@ -47,7 +57,7 @@ export default function SubmitProject() {
   });
 
   const submitFinal = useMutation({
-    mutationFn: async data => {
+    mutationFn: async (data: ProjectForm) => {
       if (existing) return api.submissions.update(existing.id,{...data,is_draft:false,status:"submitted"});
       return api.submissions.create({...data,hackathon_id:hackathon?.id,team_id:team?.id,team_name:team?.name,track:team?.track,is_draft:false,status:"submitted"});
     },
@@ -60,9 +70,9 @@ export default function SubmitProject() {
       setTechInput("");
     }
   };
-  const removeTech = t => setForm(prev=>({...prev,tech_stack:prev.tech_stack.filter(x=>x!==t)}));
+  const removeTech = (t: string) => setForm(prev=>({...prev,tech_stack:prev.tech_stack.filter(x=>x!==t)}));
 
-  const handlePitchUpload = e => {
+  const handlePitchUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 10*1024*1024) { toast.error("File must be under 10 MB"); return; }

@@ -1,27 +1,30 @@
 ﻿import React, { useState } from "react";
-import { api } from "@/lib/mockData";
+import type { InputHTMLAttributes, ReactNode } from "react";
+import { api, type ApiError } from "@/lib/mockData";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import PageShell from "@/components/shared/PageShell";
-import { Check, ArrowRight, ArrowLeft, Copy, User, Users, Code2, Eye, Sparkles } from "lucide-react";
+import { Check, ArrowRight, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import RegistrationSuccess from "@/components/registration/RegistrationSuccess";
+import RegistrationProgress from "@/components/registration/RegistrationProgress";
+import RegistrationHero from "@/components/registration/RegistrationHero";
+import type { DuplicateRegistrationError } from "@/mocks/types";
 
-const STEPS       = ["Personal Info","Team Setup","Track Selection","Review & Submit"];
-const STEP_ICONS  = [User, Users, Code2, Eye];
+type TeamAction = "create" | "join";
 
-function Orb({ style }) {
-  return (
-    <motion.div className="absolute rounded-full pointer-events-none" style={style}
-      animate={{ y:[0,-24,0], x:[0,12,0] }}
-      transition={{ duration:style.dur||9, repeat:Infinity, ease:"easeInOut", delay:style.del||0 }} />
-  );
-}
+type RegistrationForm = {
+  participant_name: string; email: string; organization: string; role_title: string;
+  team_action: TeamAction; team_name: string; invite_code: string; track: string;
+};
 
-const FL = ({ htmlFor, children }) => (
+type RegistrationErrors = Partial<Record<keyof RegistrationForm, string>>;
+
+const FL = ({ htmlFor, children }: { htmlFor: string; children: ReactNode }) => (
   <label htmlFor={htmlFor} className="block text-sm font-bold mb-2" style={{ color:"#1A1F3C" }}>{children}</label>
 );
 
-const FI = ({ id, ...props }) => (
+const FI = ({ id, ...props }: InputHTMLAttributes<HTMLInputElement> & { id: string }) => (
   <input id={id} {...props}
     className="w-full px-4 py-3 rounded-2xl text-sm font-medium outline-none transition-all"
     style={{ background:"#F8F7FF",border:"1.5px solid rgba(26,31,60,.14)",color:"#1A1F3C" }}
@@ -33,8 +36,8 @@ export default function RegisterHackathon() {
   const [step, setStep] = useState(0);
   const [done, setDone] = useState(false);
   const [regId, setRegId] = useState("");
-  const [errors, setErrors] = useState({});
-  const [form, setForm] = useState({
+  const [errors, setErrors] = useState<RegistrationErrors>({});
+  const [form, setForm] = useState<RegistrationForm>({
     participant_name:"", email:"", organization:"", role_title:"",
     team_action:"create", team_name:"", invite_code:"", track:"",
   });
@@ -45,14 +48,16 @@ export default function RegisterHackathon() {
   const activeHackathon = hackathons.find(h => h.status === "active") || hackathons[0];
 
   const createReg = useMutation({
-    mutationFn: data => api.registrations.create(data),
+    mutationFn: (data: RegistrationForm & { hackathon_id?: string }) => api.registrations.create(data),
     onSuccess: data => {
       setRegId("BX-" + String(data.id).slice(-8).toUpperCase());
       setDone(true);
     },
     onError: error => {
-      if (error?.status === 409 && error?.data?.code === "DUPLICATE_REGISTRATION") {
-        setRegId("BX-" + String(error.data.registrationId).slice(-8).toUpperCase());
+      const apiError = error as ApiError;
+      const data = apiError.data as DuplicateRegistrationError | undefined;
+      if (apiError.status === 409 && data?.code === "DUPLICATE_REGISTRATION") {
+        setRegId("BX-" + String(data.registrationId).slice(-8).toUpperCase());
         setDone(true);
         return;
       }
@@ -61,13 +66,13 @@ export default function RegisterHackathon() {
     },
   });
 
-  const update = (field, value) => {
+  const update = <K extends keyof RegistrationForm>(field: K, value: RegistrationForm[K]) => {
     setForm(prev => ({ ...prev, [field]:value }));
     setErrors(prev => ({ ...prev, [field]:undefined }));
   };
 
   const validateStep = () => {
-    const e = {};
+    const e: RegistrationErrors = {};
     if (step === 0) {
       if (!form.participant_name.trim()) e.participant_name = "Name is required";
       if (!form.email.trim()) e.email = "Email is required";
@@ -88,102 +93,22 @@ export default function RegisterHackathon() {
 
   const next   = () => { if (validateStep()) setStep(s => Math.min(s+1,3)); };
   const prev   = () => setStep(s => Math.max(s-1,0));
-  const submit = () => {
-    createReg.mutate({ ...form, hackathon_id: activeHackathon?.id });
-  };
+  const submit = () => createReg.mutate({ ...form, hackathon_id: activeHackathon?.id });
 
-  const Err = ({ field }) => errors[field]
+  const Err = ({ field }: { field: keyof RegistrationForm }) => errors[field]
     ? <p className="text-xs font-semibold mt-1.5" style={{ color:"#F43F5E" }} role="alert">{errors[field]}</p>
     : null;
 
-  if (done) return (
-    <PageShell>
-      <div className="relative min-h-screen flex items-center justify-center overflow-hidden"
-        style={{ background:"linear-gradient(160deg,#FFF8F4 0%,#F8F5FF 100%)" }}>
-        <Orb style={{ width:400,height:400,top:"-80px",right:"-80px",background:"radial-gradient(ellipse,rgba(244,98,42,.15) 0%,transparent 70%)",filter:"blur(60px)",dur:10,del:0 }} />
-        <motion.div initial={{ opacity:0,scale:.85 }} animate={{ opacity:1,scale:1 }}
-          transition={{ type:"spring",stiffness:200,damping:20 }}
-          className="relative z-10 max-w-md w-full mx-auto px-6 text-center">
-          <motion.div initial={{ scale:0 }} animate={{ scale:1 }} transition={{ delay:.2,type:"spring" }}
-            className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6"
-            style={{ background:"linear-gradient(135deg,#10B981,#06B6D4)",boxShadow:"0 12px 40px rgba(16,185,129,.4)" }}>
-            <Check className="w-12 h-12 text-white" strokeWidth={3} aria-hidden="true" />
-          </motion.div>
-          <h1 className="font-heading text-4xl font-extrabold mb-3" style={{ color:"#1A1F3C" }}>You&apos;re In!</h1>
-          <p className="text-base mb-8" style={{ color:"rgba(26,31,60,.6)" }}>
-            Welcome to <span className="font-bold" style={{ color:"#F4622A" }}>{activeHackathon?.title}</span>. Your spot is confirmed.
-          </p>
-          <div className="p-5 rounded-2xl mb-6"
-            style={{ background:"rgba(255,255,255,.9)",border:"1px solid rgba(26,31,60,.09)",boxShadow:"0 4px 20px rgba(0,0,0,.06)" }}>
-            <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color:"rgba(26,31,60,.4)" }}>Registration ID</p>
-            <div className="flex items-center justify-center gap-3">
-              <span className="font-mono text-2xl font-extrabold" style={{ color:"#1A1F3C" }}>{regId}</span>
-              <button onClick={() => { navigator.clipboard.writeText(regId); toast.success("Copied!"); }}
-                className="p-2 rounded-xl" style={{ background:"rgba(244,98,42,.1)",color:"#F4622A" }}
-                aria-label="Copy registration ID">
-                <Copy className="w-4 h-4" aria-hidden="true" />
-              </button>
-            </div>
-          </div>
-          <a href="/participant">
-            <button className="btn-primary flex items-center gap-2 px-8 py-3 rounded-full text-sm mx-auto">
-              Go to Dashboard <ArrowRight className="w-4 h-4" aria-hidden="true" />
-            </button>
-          </a>
-        </motion.div>
-      </div>
-    </PageShell>
-  );
+  if (done) {
+    return <RegistrationSuccess regId={regId} hackathonTitle={activeHackathon?.title} />;
+  }
 
   return (
     <PageShell>
-      <div className="relative overflow-hidden pt-28 pb-10"
-        style={{ background:"linear-gradient(160deg,#FFF8F4 0%,#FAFEFF 50%,#F8F5FF 100%)" }}>
-        <Orb style={{ width:500,height:500,top:"-120px",right:"-100px",background:"radial-gradient(ellipse,rgba(244,98,42,.16) 0%,transparent 70%)",filter:"blur(70px)",dur:10,del:0 }} />
-        <div className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none"
-          style={{ background:"linear-gradient(to bottom,transparent,#FAF8F5)" }} />
-        <div className="relative max-w-2xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center gap-3 mb-3">
-            <span className="text-[10px] font-bold uppercase tracking-[.2em] pill-coral px-3 py-1 flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3" aria-hidden="true" /> REGISTRATION
-            </span>
-          </div>
-          <h1 className="font-heading font-extrabold tracking-tight" style={{ fontSize:"clamp(2rem,5vw,3.2rem)",color:"#1A1F3C" }}>
-            Register for <span className="text-shimmer">Hackathon</span>
-          </h1>
-          <p className="mt-2 text-base font-semibold" style={{ color:"rgba(26,31,60,.5)" }}>{activeHackathon?.title}</p>
-        </div>
-      </div>
+      <RegistrationHero hackathonTitle={activeHackathon?.title} />
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 pb-20">
-        {/* Step progress */}
-        <nav aria-label="Registration steps" className="flex items-center gap-2 mb-8">
-          {STEPS.map((s, i) => {
-            const Icon   = STEP_ICONS[i];
-            const isDone = i < step, isActive = i === step;
-            return (
-              <React.Fragment key={s}>
-                <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold border-2 flex-shrink-0"
-                    style={{
-                      background: isDone?"linear-gradient(135deg,#F4622A,#FB923C)":isActive?"rgba(244,98,42,.08)":"transparent",
-                      borderColor: isDone||isActive?"#F4622A":"rgba(26,31,60,.15)",
-                      color: isDone?"#fff":isActive?"#F4622A":"rgba(26,31,60,.35)",
-                    }}
-                    aria-current={isActive?"step":undefined}>
-                    {isDone ? <Check className="w-4 h-4" aria-hidden="true" /> : <Icon className="w-3.5 h-3.5" aria-hidden="true" />}
-                  </div>
-                  <span className="text-xs font-bold hidden sm:inline"
-                    style={{ color:isActive?"#1A1F3C":isDone?"#F4622A":"rgba(26,31,60,.35)" }}>{s}</span>
-                </div>
-                {i < STEPS.length-1 && (
-                  <div className="flex-1 h-0.5 rounded-full"
-                    style={{ background:i<step?"linear-gradient(90deg,#F4622A,#FB923C)":"rgba(26,31,60,.1)" }} />
-                )}
-              </React.Fragment>
-            );
-          })}
-        </nav>
+        <RegistrationProgress step={step} />
 
         <AnimatePresence mode="wait">
           <motion.div key={step}
@@ -203,10 +128,10 @@ export default function RegisterHackathon() {
 
               {step === 1 && (
                 <div className="space-y-4">
-                  {[
+                  {([
                     { val:"create", label:"Create a New Team", sub:"Start a team and invite others" },
                     { val:"join",   label:"Join Existing Team", sub:"Enter an invite code from your team lead" },
-                  ].map(opt => (
+                  ] as const).map(opt => (
                     <div key={opt.val} onClick={() => update("team_action",opt.val)}
                       className="flex items-center gap-4 p-4 rounded-2xl cursor-pointer"
                       style={{ border:`2px solid ${form.team_action===opt.val?"#F4622A":"rgba(26,31,60,.1)"}`,background:form.team_action===opt.val?"rgba(244,98,42,.05)":"#fff" }}
