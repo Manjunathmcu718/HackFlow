@@ -9,15 +9,15 @@ export default function CountdownTimer({ targetDate, label, compact = false }) {
       const diff = new Date(targetDate) - new Date();
       if (diff <= 0) { setExpired(true); return; }
       setTimeLeft({
-        days:    Math.floor(diff / (1000 * 60 * 60 * 24)),
-        hours:   Math.floor((diff / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((diff / (1000 * 60)) % 60),
+        days:    Math.floor(diff / 86400000),
+        hours:   Math.floor((diff / 3600000) % 24),
+        minutes: Math.floor((diff / 60000) % 60),
         seconds: Math.floor((diff / 1000) % 60),
       });
     };
     calc();
-    const interval = setInterval(calc, 1000);
-    return () => clearInterval(interval);
+    const id = setInterval(calc, 1000);
+    return () => clearInterval(id);
   }, [targetDate]);
 
   if (expired) return (
@@ -48,7 +48,7 @@ export default function CountdownTimer({ targetDate, label, compact = false }) {
     <div>
       {label && <p className="text-xs text-muted-foreground text-center mb-3">{label}</p>}
       <div className="flex items-center gap-2 sm:gap-3">
-        {units.map((u) => (
+        {units.map(u => (
           <div key={u.label} className="flex flex-col items-center">
             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-card border border-border flex items-center justify-center">
               <span className="text-xl sm:text-2xl font-mono font-bold tabular-nums">{String(u.value).padStart(2,"0")}</span>
@@ -60,4 +60,3 @@ export default function CountdownTimer({ targetDate, label, compact = false }) {
     </div>
   );
 }
-

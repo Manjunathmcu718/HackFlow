@@ -1,32 +1,37 @@
 ﻿import React from "react";
 import { Link } from "react-router-dom";
-import { hackathons, teams, submissions, announcements } from "../lib/mockData";
-import PageShell from "../components/shared/PageShell";
-import StatusBadge from "../components/shared/StatusBadge";
-import CountdownTimer from "../components/shared/CountdownTimer";
+import { api } from "@/lib/mockData";
+import { useQuery } from "@tanstack/react-query";
+import PageShell from "@/components/shared/PageShell";
+import StatusBadge from "@/components/shared/StatusBadge";
+import CountdownTimer from "@/components/shared/CountdownTimer";
 import { Users, Copy, Send, Trophy, ExternalLink, Megaphone, BookOpen, Clock, ArrowRight, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 const LightCard = ({ children, className="", style={} }) => (
   <div className={`rounded-2xl ${className}`}
-    style={{ background:"#fff", border:"1px solid rgba(26,31,60,.08)", boxShadow:"0 2px 12px rgba(0,0,0,.05)", ...style }}>
+    style={{ background:"#fff",border:"1px solid rgba(26,31,60,.08)",boxShadow:"0 2px 12px rgba(0,0,0,.05)",...style }}>
     {children}
   </div>
 );
 
 export default function ParticipantDashboard() {
-  const hackathon     = hackathons.find(h => h.status==="active") || hackathons[0];
-  const team          = teams[0];
+  const { data: hackathons    = [] } = useQuery({ queryKey:["hackathons"],    queryFn:() => api.hackathons.list() });
+  const { data: teams         = [] } = useQuery({ queryKey:["teams"],         queryFn:() => api.teams.list() });
+  const { data: submissions   = [] } = useQuery({ queryKey:["submissions"],   queryFn:() => api.submissions.list() });
+  const { data: announcements = [] } = useQuery({ queryKey:["announcements"], queryFn:() => api.announcements.list() });
+
+  const hackathon      = hackathons.find(h => h.status==="active") || hackathons[0];
+  const team           = teams[0];
   const teamSubmission = submissions.find(s => s.team_id === team?.id);
-  const notices       = announcements.filter(a => a.hackathon_id === hackathon?.id);
+  const notices        = announcements.filter(a => a.hackathon_id === hackathon?.id);
 
   const priorityIcon  = { urgent:AlertTriangle, warning:Clock, info:Megaphone };
   const priorityColor = { urgent:"#F43F5E", warning:"#F59E0B", info:"#3B82F6" };
 
-  const leaderboardData = submissions
-    .filter(s => s.status==="submitted" && s.average_score > 0)
-    .sort((a,b) => b.average_score - a.average_score);
-  const myRank = leaderboardData.findIndex(s => s.team_id === team?.id) + 1;
+  const leaderboardData = submissions.filter(s=>s.status==="submitted"&&s.average_score>0).sort((a,b)=>b.average_score-a.average_score);
+  const myRank = leaderboardData.findIndex(s=>s.team_id===team?.id)+1;
 
   const rankStyle = (i) => ({
     bg:    i===0?"rgba(245,158,11,.15)":i===1?"rgba(148,163,184,.15)":i===2?"rgba(249,115,22,.15)":"rgba(26,31,60,.07)",
@@ -35,14 +40,13 @@ export default function ParticipantDashboard() {
 
   return (
     <PageShell>
-      {/* Header */}
       <div className="relative overflow-hidden pt-28 pb-12" style={{ background:"linear-gradient(135deg,#FFF5EF 0%,#FFFBF0 60%,#F5FFF8 100%)" }}>
         <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
-              style={{ background:"linear-gradient(135deg,#F4622A,#FB923C)", boxShadow:"0 8px 28px rgba(244,98,42,.4)" }}>
-              <Users className="w-7 h-7 text-white" />
+              style={{ background:"linear-gradient(135deg,#F4622A,#FB923C)",boxShadow:"0 8px 28px rgba(244,98,42,.4)" }}>
+              <Users className="w-7 h-7 text-white" aria-hidden="true" />
             </div>
             <div>
               <h1 className="font-heading font-extrabold text-3xl sm:text-4xl tracking-tight" style={{ color:"#1A1F3C" }}>Participant Dashboard</h1>
@@ -56,33 +60,33 @@ export default function ParticipantDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main */}
           <div className="lg:col-span-2 space-y-6">
-
             {/* Team */}
             <LightCard>
               <div className="p-5 pb-3 flex items-center justify-between border-b" style={{ borderColor:"rgba(26,31,60,.07)" }}>
                 <div className="flex items-center gap-2 font-semibold text-sm" style={{ color:"#1A1F3C" }}>
-                  <Users className="w-4 h-4" style={{ color:"#F4622A" }} /> Team Overview
+                  <Users className="w-4 h-4" style={{ color:"#F4622A" }} aria-hidden="true" /> Team Overview
                 </div>
                 <StatusBadge status={team?.submission_status||"not_started"} />
               </div>
               <div className="p-5">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="font-bold text-lg" style={{ color:"#1A1F3C" }}>{team?.name||"Your Team"}</h3>
+                    <h2 className="font-bold text-lg" style={{ color:"#1A1F3C" }}>{team?.name||"Your Team"}</h2>
                     <p className="text-xs font-medium" style={{ color:"rgba(26,31,60,.5)" }}>Track: {team?.track}</p>
                   </div>
                   <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold"
-                    style={{ background:"rgba(244,98,42,.08)", border:"1px solid rgba(244,98,42,.2)", color:"#F4622A" }}
-                    onClick={() => navigator.clipboard.writeText(team?.invite_code||"")}>
-                    <Copy className="w-3 h-3" /> {team?.invite_code}
+                    style={{ background:"rgba(244,98,42,.08)",border:"1px solid rgba(244,98,42,.2)",color:"#F4622A" }}
+                    onClick={() => { navigator.clipboard.writeText(team?.invite_code||""); toast.success("Invite code copied!"); }}
+                    aria-label="Copy invite code">
+                    <Copy className="w-3 h-3" aria-hidden="true" /> {team?.invite_code}
                   </button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {(team?.members||[]).map((m,i) => (
                     <div key={i} className="flex items-center gap-3 p-3 rounded-xl"
-                      style={{ background:"rgba(244,98,42,.04)", border:"1px solid rgba(244,98,42,.1)" }}>
+                      style={{ background:"rgba(244,98,42,.04)",border:"1px solid rgba(244,98,42,.1)" }}>
                       <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-extrabold text-white flex-shrink-0"
-                        style={{ background:"linear-gradient(135deg,#F4622A,#FB923C)" }}>
+                        style={{ background:"linear-gradient(135deg,#F4622A,#FB923C)" }} aria-hidden="true">
                         {m.name?.charAt(0)}
                       </div>
                       <div>
@@ -99,7 +103,7 @@ export default function ParticipantDashboard() {
             <LightCard>
               <div className="p-5 pb-3 flex items-center justify-between border-b" style={{ borderColor:"rgba(26,31,60,.07)" }}>
                 <div className="flex items-center gap-2 font-semibold text-sm" style={{ color:"#1A1F3C" }}>
-                  <Send className="w-4 h-4" style={{ color:"#F4622A" }} /> Submission
+                  <Send className="w-4 h-4" style={{ color:"#F4622A" }} aria-hidden="true" /> Submission
                 </div>
                 <StatusBadge status={teamSubmission?.status||"draft"} />
               </div>
@@ -109,7 +113,7 @@ export default function ParticipantDashboard() {
                     <h3 className="font-bold mb-1" style={{ color:"#1A1F3C" }}>{teamSubmission.project_title}</h3>
                     <p className="text-sm line-clamp-2 mb-3" style={{ color:"rgba(26,31,60,.55)" }}>{teamSubmission.description}</p>
                     <div className="flex flex-wrap gap-1.5">
-                      {(teamSubmission.tech_stack||[]).map(t => <span key={t} className="text-xs font-semibold px-2.5 py-1 rounded-full pill-violet">{t}</span>)}
+                      {(teamSubmission.tech_stack||[]).map(t=><span key={t} className="text-xs font-semibold px-2.5 py-1 rounded-full pill-violet">{t}</span>)}
                     </div>
                   </div>
                 ) : (
@@ -117,7 +121,7 @@ export default function ParticipantDashboard() {
                 )}
                 <Link to="/submit">
                   <button className="btn-primary w-full flex items-center justify-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold">
-                    {teamSubmission ? "Edit Submission" : "Start Submission"} <ArrowRight className="w-4 h-4" />
+                    {teamSubmission?"Edit Submission":"Start Submission"} <ArrowRight className="w-4 h-4" aria-hidden="true" />
                   </button>
                 </Link>
               </div>
@@ -127,59 +131,61 @@ export default function ParticipantDashboard() {
             <LightCard>
               <div className="p-5 pb-3 border-b" style={{ borderColor:"rgba(26,31,60,.07)" }}>
                 <div className="flex items-center gap-2 font-semibold text-sm" style={{ color:"#1A1F3C" }}>
-                  <Megaphone className="w-4 h-4" style={{ color:"#F4622A" }} /> Announcements
+                  <Megaphone className="w-4 h-4" style={{ color:"#F4622A" }} aria-hidden="true" /> Announcements
                 </div>
               </div>
-              <div className="p-5 space-y-3">
-                {notices.slice(0,5).map(a => {
-                  const Icon = priorityIcon[a.priority]||Megaphone;
+              <div className="p-5 space-y-3" aria-live="polite">
+                {notices.slice(0,5).map(a=>{
+                  const Icon=priorityIcon[a.priority]||Megaphone;
                   return (
-                    <div key={a.id} className="flex gap-3 p-3 rounded-xl"
-                      style={{ background:"rgba(26,31,60,.03)", border:"1px solid rgba(26,31,60,.06)" }}>
-                      <Icon className="w-4 h-4 mt-0.5 shrink-0" style={{ color:priorityColor[a.priority]||"rgba(26,31,60,.4)" }} />
+                    <article key={a.id} className="flex gap-3 p-3 rounded-xl"
+                      style={{ background:"rgba(26,31,60,.03)",border:"1px solid rgba(26,31,60,.06)" }}>
+                      <Icon className="w-4 h-4 mt-0.5 shrink-0" style={{ color:priorityColor[a.priority]||"rgba(26,31,60,.4)" }} aria-hidden="true" />
                       <div>
                         <div className="flex items-center gap-2 mb-0.5">
                           <p className="text-sm font-semibold" style={{ color:"#1A1F3C" }}>{a.title}</p>
                           <StatusBadge status={a.priority} />
                         </div>
                         <p className="text-xs" style={{ color:"rgba(26,31,60,.55)" }}>{a.message}</p>
-                        <p className="text-[10px] mt-1" style={{ color:"rgba(26,31,60,.35)" }}>{a.created_date ? format(new Date(a.created_date),"MMM d, h:mm a") : ""}</p>
+                        <p className="text-[10px] mt-1" style={{ color:"rgba(26,31,60,.35)" }}>
+                          {a.created_date ? format(new Date(a.created_date),"MMM d, h:mm a") : ""}
+                        </p>
                       </div>
-                    </div>
+                    </article>
                   );
                 })}
-                {notices.length === 0 && <p className="text-center py-6 text-sm" style={{ color:"rgba(26,31,60,.4)" }}>No announcements yet.</p>}
+                {notices.length===0&&<p className="text-center py-6 text-sm" style={{ color:"rgba(26,31,60,.4)" }}>No announcements yet.</p>}
               </div>
             </LightCard>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            <div className="rounded-2xl p-5" style={{ background:"linear-gradient(135deg,#FFF5EF,#FFF0FF)", border:"1px solid rgba(244,98,42,.15)" }}>
+            <div className="rounded-2xl p-5" style={{ background:"linear-gradient(135deg,#FFF5EF,#FFF0FF)",border:"1px solid rgba(244,98,42,.15)" }}>
               <CountdownTimer targetDate={hackathon?.submission_deadline} label="Submission Deadline" compact />
             </div>
 
             <LightCard>
               <div className="p-5 pb-3 border-b" style={{ borderColor:"rgba(26,31,60,.07)" }}>
                 <div className="flex items-center gap-2 font-semibold text-sm" style={{ color:"#1A1F3C" }}>
-                  <Trophy className="w-4 h-4" style={{ color:"#F59E0B" }} /> Leaderboard
+                  <Trophy className="w-4 h-4" style={{ color:"#F59E0B" }} aria-hidden="true" /> Leaderboard
                 </div>
               </div>
               <div className="p-5">
-                {myRank > 0 && (
+                {myRank>0&&(
                   <div className="p-3 rounded-2xl mb-4 text-center"
-                    style={{ background:"linear-gradient(135deg,rgba(244,98,42,.08),rgba(251,146,60,.08))", border:"1px solid rgba(244,98,42,.15)" }}>
+                    style={{ background:"linear-gradient(135deg,rgba(244,98,42,.08),rgba(251,146,60,.08))",border:"1px solid rgba(244,98,42,.15)" }}>
                     <p className="text-xs font-semibold mb-0.5" style={{ color:"rgba(26,31,60,.5)" }}>Your Position</p>
                     <p className="text-2xl font-extrabold" style={{ color:"#F4622A" }}>#{myRank}</p>
                   </div>
                 )}
                 <div className="space-y-2">
-                  {leaderboardData.slice(0,5).map((s,i) => {
-                    const rs = rankStyle(i);
+                  {leaderboardData.slice(0,5).map((s,i)=>{
+                    const rs=rankStyle(i);
                     return (
                       <div key={s.id} className="flex items-center gap-3 text-sm">
                         <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                          style={{ background:rs.bg, color:rs.color }}>{i+1}</span>
+                          style={{ background:rs.bg,color:rs.color }}>{i+1}</span>
                         <span className="flex-1 truncate font-medium" style={{ color:"#1A1F3C" }}>{s.team_name}</span>
                         <span className="font-mono text-xs font-bold" style={{ color:"#F4622A" }}>{s.average_score}</span>
                       </div>
@@ -187,7 +193,9 @@ export default function ParticipantDashboard() {
                   })}
                 </div>
                 <Link to="/leaderboard">
-                  <button className="btn-outline w-full flex items-center justify-center gap-1 px-4 py-2.5 rounded-2xl text-xs mt-4">View Full Leaderboard</button>
+                  <button className="btn-outline w-full flex items-center justify-center gap-1 px-4 py-2.5 rounded-2xl text-xs mt-4">
+                    View Full Leaderboard
+                  </button>
                 </Link>
               </div>
             </LightCard>
@@ -195,7 +203,7 @@ export default function ParticipantDashboard() {
             <LightCard>
               <div className="p-5 pb-3 border-b" style={{ borderColor:"rgba(26,31,60,.07)" }}>
                 <div className="flex items-center gap-2 font-semibold text-sm" style={{ color:"#1A1F3C" }}>
-                  <BookOpen className="w-4 h-4" style={{ color:"#F4622A" }} /> Resources
+                  <BookOpen className="w-4 h-4" style={{ color:"#F4622A" }} aria-hidden="true" /> Resources
                 </div>
               </div>
               <div className="p-5 space-y-2">
@@ -204,14 +212,14 @@ export default function ParticipantDashboard() {
                   { label:"Problem Statements", url:"#" },
                   { label:"Mentor Schedule",    url:"#" },
                   { label:"Discord Community",  url:"#" },
-                ].map(r => (
-                  <a key={r.label} href={r.url}
+                ].map(r=>(
+                  <a key={r.label} href__={r.url}
                     className="flex items-center justify-between p-3 rounded-xl transition-all"
-                    style={{ background:"rgba(26,31,60,.03)", border:"1px solid rgba(26,31,60,.06)" }}
-                    onMouseEnter={e => { e.currentTarget.style.background="rgba(244,98,42,.05)"; e.currentTarget.style.borderColor="rgba(244,98,42,.2)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.background="rgba(26,31,60,.03)"; e.currentTarget.style.borderColor="rgba(26,31,60,.06)"; }}>
+                    style={{ background:"rgba(26,31,60,.03)",border:"1px solid rgba(26,31,60,.06)" }}
+                    onMouseEnter={e=>{e.currentTarget.style.background="rgba(244,98,42,.05)";e.currentTarget.style.borderColor="rgba(244,98,42,.2)";}}
+                    onMouseLeave={e=>{e.currentTarget.style.background="rgba(26,31,60,.03)";e.currentTarget.style.borderColor="rgba(26,31,60,.06)";}}>
                     <span className="text-sm font-medium" style={{ color:"#1A1F3C" }}>{r.label}</span>
-                    <ExternalLink className="w-3.5 h-3.5" style={{ color:"rgba(26,31,60,.35)" }} />
+                    <ExternalLink className="w-3.5 h-3.5" style={{ color:"rgba(26,31,60,.35)" }} aria-hidden="true" />
                   </a>
                 ))}
               </div>
@@ -222,4 +230,3 @@ export default function ParticipantDashboard() {
     </PageShell>
   );
 }
-

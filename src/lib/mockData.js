@@ -1,4 +1,10 @@
-﻿export const hackathons = [
+﻿// â”€â”€ Mock API Layer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Async API with 80ms simulated latency. Swap function bodies for real fetch().
+
+const delay = (ms = 80) => new Promise(r => setTimeout(r, ms));
+
+// â”€â”€ Seed data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+export const hackathons = [
   {
     id: "1",
     title: "BeetleX Global Hackathon 2025",
@@ -33,18 +39,18 @@
     eligibility: "Open to all developers worldwide, 18+. Teams of 1-4 members. No prior Web3 experience required.",
     sponsors: [
       { name: "Ethereum Foundation", tier: "platinum" },
-      { name: "Polygon",             tier: "gold" },
-      { name: "Chainlink",           tier: "gold" },
-      { name: "Alchemy",             tier: "silver" },
-      { name: "The Graph",           tier: "silver" },
-      { name: "IPFS",                tier: "silver" },
+      { name: "Polygon", tier: "gold" },
+      { name: "Chainlink", tier: "gold" },
+      { name: "Alchemy", tier: "silver" },
+      { name: "The Graph", tier: "silver" },
+      { name: "IPFS", tier: "silver" },
     ],
     faqs: [
-      { question: "Do I need Web3 experience to participate?", answer: "Not at all! We welcome developers of all backgrounds. We run workshops and have mentors to help you get started." },
-      { question: "Can I participate solo?",                   answer: "Yes! Solo participation is fully supported. Teams can be 1-4 members." },
-      { question: "Is BeetleX free to join?",                  answer: "Participation is completely free." },
-      { question: "When are results announced?",               answer: "Results are announced on July 16. Winners receive prizes within 30 days." },
-      { question: "What do I need to submit?",                 answer: "A working demo, GitHub repository, and a short pitch. Bonus points for a video walkthrough." },
+      { question: "Do I need Web3 experience?", answer: "Not at all! We welcome developers of all backgrounds." },
+      { question: "Can I participate solo?",    answer: "Yes! Solo participation is fully supported. Teams can be 1 to 4 members." },
+      { question: "Is it free to join?",        answer: "Participation is completely free." },
+      { question: "When are results announced?", answer: "Results are announced on July 16. Winners receive prizes within 30 days." },
+      { question: "What do I need to submit?",  answer: "A working demo, GitHub repo, and a short pitch. Bonus points for a video." },
     ],
   },
   {
@@ -66,8 +72,8 @@
     max_team_size: 3,
     min_team_size: 1,
     tracks: [
-      { name: "AI Agents",   description: "Build autonomous AI agents.", prize: "$2,000" },
-      { name: "Social dApps",description: "Decentralized social experiences.", prize: "$2,000" },
+      { name: "AI Agents",    description: "Build autonomous AI agents.", prize: "$2,000" },
+      { name: "Social dApps", description: "Decentralized social experiences.", prize: "$2,000" },
     ],
     prizes: [
       { place: "1st Place", amount: "$3,000", description: "Best overall" },
@@ -77,8 +83,8 @@
     eligibility: "Open worldwide, all skill levels.",
     sponsors: [{ name: "Base", tier: "gold" }, { name: "Lens Protocol", tier: "silver" }],
     faqs: [
-      { question: "How long is the sprint?",    answer: "48 hours from start to submission." },
-      { question: "Can I use existing code?",   answer: "Core project must be built during the sprint. Libraries and frameworks are fine." },
+      { question: "How long is the sprint?",  answer: "48 hours from start to submission." },
+      { question: "Can I use existing code?", answer: "Libraries are fine; core project must be built during the sprint." },
     ],
   },
   {
@@ -144,82 +150,58 @@ export const teams = [
 
 export const submissions = [
   {
-    id: "s1",
-    hackathon_id: "1",
-    team_id: "t1",
-    team_name: "ChainBreakers",
+    id: "s1", hackathon_id: "1", team_id: "t1", team_name: "ChainBreakers",
     project_title: "DeFi Shield",
-    description: "An AI-powered DeFi risk management protocol that protects users from rug pulls, flash loan attacks, and impermanent loss using real-time on-chain analytics.",
+    description: "An AI-powered DeFi risk management protocol that protects users from rug pulls and flash loan attacks.",
     tech_stack: ["React", "Solidity", "Chainlink", "The Graph", "Hardhat"],
     demo_url: "https://defi-shield-demo.vercel.app",
     github_url: "https://github.com/chainbreakers/defi-shield",
-    track: "DeFi & Web3",
-    status: "submitted",
-    is_draft: false,
+    pitch_deck_url: "", video_url: "",
+    track: "DeFi & Web3", status: "submitted", is_draft: false,
     scores: [
       { judge_name: "Judge Alpha", innovation: 9, technical: 8, impact: 9, presentation: 8, total: 34, comments: "Excellent real-world utility." },
       { judge_name: "Judge Beta",  innovation: 8, technical: 9, impact: 8, presentation: 9, total: 34, comments: "Outstanding technical depth." },
     ],
-    average_score: 34,
-    rank: 1,
+    average_score: 34, rank: 1,
   },
   {
-    id: "s2",
-    hackathon_id: "1",
-    team_id: "t2",
-    team_name: "Neural Nexus",
+    id: "s2", hackathon_id: "1", team_id: "t2", team_name: "Neural Nexus",
     project_title: "MindChain",
-    description: "A decentralized knowledge graph powered by LLMs that enables communities to collaboratively build and monetize knowledge bases on-chain.",
+    description: "A decentralized knowledge graph powered by LLMs for collaborative on-chain knowledge bases.",
     tech_stack: ["Next.js", "Python", "GPT-4", "IPFS", "Polygon"],
     demo_url: "https://mindchain.io",
     github_url: "https://github.com/neuralnexus/mindchain",
-    track: "AI & ML",
-    status: "submitted",
-    is_draft: false,
+    pitch_deck_url: "", video_url: "",
+    track: "AI & ML", status: "submitted", is_draft: false,
     scores: [
       { judge_name: "Judge Alpha", innovation: 10, technical: 9, impact: 9, presentation: 8, total: 36, comments: "Most innovative idea this hackathon." },
     ],
-    average_score: 36,
-    rank: 2,
+    average_score: 36, rank: 2,
   },
   {
-    id: "s3",
-    hackathon_id: "1",
-    team_id: "t3",
-    team_name: "PixelForge",
+    id: "s3", hackathon_id: "1", team_id: "t3", team_name: "PixelForge",
     project_title: "MetaQuest Arena",
-    description: "A play-to-earn gaming platform where players battle with NFT characters.",
+    description: "A play-to-earn gaming platform with NFT characters.",
     tech_stack: ["Unity", "Solidity", "OpenSea SDK", "IPFS"],
-    demo_url: "https://metaquest.gg",
-    github_url: "https://github.com/pixelforge/metaquest",
-    track: "Gaming & NFTs",
-    status: "submitted",
-    is_draft: false,
-    scores: [
-      { judge_name: "Judge Beta", innovation: 8, technical: 7, impact: 8, presentation: 9, total: 32, comments: "Great gaming experience." },
-    ],
-    average_score: 32,
-    rank: 3,
+    demo_url: "https://metaquest.gg", github_url: "https://github.com/pixelforge/metaquest",
+    pitch_deck_url: "", video_url: "",
+    track: "Gaming & NFTs", status: "submitted", is_draft: false,
+    scores: [{ judge_name: "Judge Beta", innovation: 8, technical: 7, impact: 8, presentation: 9, total: 32, comments: "Great gaming experience." }],
+    average_score: 32, rank: 3,
   },
   {
-    id: "s4",
-    hackathon_id: "1",
-    team_id: "t4",
-    team_name: "DevKit Pro",
+    id: "s4", hackathon_id: "1", team_id: "t4", team_name: "DevKit Pro",
     project_title: "ChainIDE Pro",
-    description: "A browser-based IDE with built-in smart contract templates and AI code completion.",
+    description: "A browser-based IDE with smart contract templates and AI code completion.",
     tech_stack: ["React", "Monaco Editor", "Ethers.js", "OpenAI"],
-    demo_url: "https://chainide.dev",
-    github_url: "https://github.com/devkitpro/chainide",
-    track: "Dev Tools",
-    status: "submitted",
-    is_draft: false,
+    demo_url: "https://chainide.dev", github_url: "https://github.com/devkitpro/chainide",
+    pitch_deck_url: "", video_url: "",
+    track: "Dev Tools", status: "submitted", is_draft: false,
     scores: [
       { judge_name: "Judge Alpha", innovation: 7, technical: 9, impact: 8, presentation: 7, total: 31, comments: "Very useful developer tool." },
       { judge_name: "Judge Beta",  innovation: 8, technical: 8, impact: 7, presentation: 8, total: 31, comments: "Clean implementation." },
     ],
-    average_score: 31,
-    rank: 4,
+    average_score: 31, rank: 4,
   },
 ];
 
@@ -233,9 +215,56 @@ export const registrations = [
 ];
 
 export const announcements = [
-  { id: "a1", hackathon_id: "1", title: "Submission Portal Now Open",  message: "You can now submit your projects via the Submit page. Save drafts frequently!",       priority: "info",    author: "Organizer", created_date: "2025-07-10T10:00:00" },
-  { id: "a2", hackathon_id: "1", title: "48 Hours Remaining!",         message: "Only 48 hours left. Final submissions close July 14 at 11:59 PM UTC.",               priority: "warning", author: "Organizer", created_date: "2025-07-12T10:00:00" },
-  { id: "a3", hackathon_id: "1", title: "Mentor Office Hours",         message: "Join our Discord for live mentor sessions every day at 2 PM UTC.",                   priority: "info",    author: "Organizer", created_date: "2025-07-08T09:00:00" },
-  { id: "a4", hackathon_id: "1", title: "API Rate Limits Increased",   message: "Chainlink and Alchemy API limits have been increased for all participants.",           priority: "info",    author: "Organizer", created_date: "2025-07-05T14:00:00" },
+  { id: "a1", hackathon_id: "1", title: "Submission Portal Now Open",  message: "You can now submit your projects. Save drafts frequently!",        priority: "info",    author: "Organizer", created_date: "2025-07-10T10:00:00" },
+  { id: "a2", hackathon_id: "1", title: "48 Hours Remaining!",         message: "Final submissions close July 14 at 11:59 PM UTC.",                 priority: "warning", author: "Organizer", created_date: "2025-07-12T10:00:00" },
+  { id: "a3", hackathon_id: "1", title: "Mentor Office Hours",         message: "Join our Discord for live mentor sessions daily at 2 PM UTC.",     priority: "info",    author: "Organizer", created_date: "2025-07-08T09:00:00" },
+  { id: "a4", hackathon_id: "1", title: "API Rate Limits Increased",   message: "Chainlink and Alchemy API limits increased for all participants.",  priority: "info",    author: "Organizer", created_date: "2025-07-05T14:00:00" },
 ];
 
+// â”€â”€ Mutable in-memory stores â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+let _registrations = [...registrations];
+let _submissions   = [...submissions];
+let _announcements = [...announcements];
+
+// â”€â”€ Async Mock API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+export const api = {
+  hackathons: {
+    list: async () => { await delay(); return [...hackathons]; },
+    get:  async (id) => { await delay(); return hackathons.find(h => h.id === String(id)) ?? null; },
+  },
+  teams: {
+    list: async () => { await delay(); return [...teams]; },
+  },
+  submissions: {
+    list: async () => { await delay(); return [..._submissions]; },
+    create: async (data) => {
+      await delay();
+      const rec = { ...data, id: `s${Date.now()}`, created_date: new Date().toISOString() };
+      _submissions.push(rec);
+      return rec;
+    },
+    update: async (id, data) => {
+      await delay();
+      _submissions = _submissions.map(s => s.id === id ? { ...s, ...data } : s);
+      return _submissions.find(s => s.id === id);
+    },
+  },
+  registrations: {
+    list: async () => { await delay(); return [..._registrations]; },
+    create: async (data) => {
+      await delay();
+      const rec = { ...data, id: `r${Date.now()}`, status: "confirmed", created_date: new Date().toISOString() };
+      _registrations.push(rec);
+      return rec;
+    },
+  },
+  announcements: {
+    list:   async () => { await delay(); return [..._announcements].sort((a, b) => new Date(b.created_date) - new Date(a.created_date)); },
+    create: async (data) => {
+      await delay();
+      const rec = { ...data, id: `a${Date.now()}`, created_date: new Date().toISOString() };
+      _announcements.unshift(rec);
+      return rec;
+    },
+  },
+};

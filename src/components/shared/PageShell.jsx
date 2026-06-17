@@ -11,4 +11,3 @@ export default function PageShell({ children, hideFooter = false }) {
     </div>
   );
 }
-
