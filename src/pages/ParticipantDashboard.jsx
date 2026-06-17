@@ -213,7 +213,7 @@ export default function ParticipantDashboard() {
                   { label:"Mentor Schedule",    url:"#" },
                   { label:"Discord Community",  url:"#" },
                 ].map(r=>(
-                  <a key={r.label} href__={r.url}
+                  <a key={r.label} href={r.url}
                     className="flex items-center justify-between p-3 rounded-xl transition-all"
                     style={{ background:"rgba(26,31,60,.03)",border:"1px solid rgba(26,31,60,.06)" }}
                     onMouseEnter={e=>{e.currentTarget.style.background="rgba(244,98,42,.05)";e.currentTarget.style.borderColor="rgba(244,98,42,.2)";}}
@@ -230,3 +230,4 @@ export default function ParticipantDashboard() {
     </PageShell>
   );
 }
+

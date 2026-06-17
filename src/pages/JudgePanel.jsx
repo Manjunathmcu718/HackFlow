@@ -119,10 +119,10 @@ export default function JudgePanel() {
                   {(selected.tech_stack||[]).map(t=><span key={t} className="text-xs font-semibold px-2.5 py-1 rounded-full pill-violet">{t}</span>)}
                 </div>
                 <div className="space-y-2">
-                  {selected.demo_url&&<a href__={selected.demo_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-semibold" style={{ color:"#F4622A" }}><ExternalLink className="w-3.5 h-3.5" aria-hidden="true" /> Live Demo</a>}
-                  {selected.github_url&&<a href__={selected.github_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-semibold" style={{ color:"#F4622A" }}><Github className="w-3.5 h-3.5" aria-hidden="true" /> GitHub</a>}
-                  {selected.pitch_deck_url&&<a href__={selected.pitch_deck_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-semibold" style={{ color:"#F4622A" }}><FileText className="w-3.5 h-3.5" aria-hidden="true" /> Pitch Deck</a>}
-                  {selected.video_url&&<a href__={selected.video_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-semibold" style={{ color:"#F4622A" }}><Film className="w-3.5 h-3.5" aria-hidden="true" /> Demo Video</a>}
+                  {selected.demo_url&&<a href={selected.demo_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-semibold" style={{ color:"#F4622A" }}><ExternalLink className="w-3.5 h-3.5" aria-hidden="true" /> Live Demo</a>}
+                  {selected.github_url&&<a href={selected.github_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-semibold" style={{ color:"#F4622A" }}><Github className="w-3.5 h-3.5" aria-hidden="true" /> GitHub</a>}
+                  {selected.pitch_deck_url&&<a href={selected.pitch_deck_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-semibold" style={{ color:"#F4622A" }}><FileText className="w-3.5 h-3.5" aria-hidden="true" /> Pitch Deck</a>}
+                  {selected.video_url&&<a href={selected.video_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-semibold" style={{ color:"#F4622A" }}><Film className="w-3.5 h-3.5" aria-hidden="true" /> Demo Video</a>}
                 </div>
               </div>
 
@@ -209,3 +209,4 @@ export default function JudgePanel() {
     </PageShell>
   );
 }
+

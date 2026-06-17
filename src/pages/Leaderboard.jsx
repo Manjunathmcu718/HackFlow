@@ -112,8 +112,8 @@ export default function Leaderboard() {
                     <p className="text-xs mt-0.5 truncate" style={{ color:"rgba(26,31,60,.5)" }}>{s.project_title}</p>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
-                    {s.demo_url&&<a href__={s.demo_url} target="_blank" rel="noopener noreferrer" aria-label="Live Demo"><ExternalLink className="w-4 h-4" style={{ color:"rgba(26,31,60,.4)" }} /></a>}
-                    {s.github_url&&<a href__={s.github_url} target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository"><Github className="w-4 h-4" style={{ color:"rgba(26,31,60,.4)" }} /></a>}
+                    {s.demo_url&&<a href={s.demo_url} target="_blank" rel="noopener noreferrer" aria-label="Live Demo"><ExternalLink className="w-4 h-4" style={{ color:"rgba(26,31,60,.4)" }} /></a>}
+                    {s.github_url&&<a href={s.github_url} target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository"><Github className="w-4 h-4" style={{ color:"rgba(26,31,60,.4)" }} /></a>}
                     <div className="text-right">
                       <p className="text-xl font-mono font-extrabold" style={{ color:"#F4622A" }}>{s.average_score}</p>
                       <div className="flex items-center gap-0.5 justify-end">
@@ -132,3 +132,4 @@ export default function Leaderboard() {
     </PageShell>
   );
 }
+

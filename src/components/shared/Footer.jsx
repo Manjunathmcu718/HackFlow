@@ -57,7 +57,7 @@ export default function Footer() {
             </p>
             <div className="flex items-center gap-2">
               {SOCIALS.map(({ icon: Icon, href, label }) => (
-                <a key={label} href__={href} aria-label={label}
+                <a key={label} href={href} aria-label={label}
                   className="w-9 h-9 rounded-xl flex items-center justify-center"
                   style={{ background: "rgba(26,31,60,.06)", border: "1px solid rgba(26,31,60,.08)", color: "rgba(26,31,60,.45)" }}>
                   <Icon className="w-4 h-4" />
@@ -72,7 +72,7 @@ export default function Footer() {
               <div className="flex flex-col gap-3">
                 {links.map(link => link.path
                   ? <Link key={link.label} to={link.path} className="text-sm" style={{ color: "rgba(26,31,60,.55)" }}>{link.label}</Link>
-                  : <a key={link.label} href__={link.href} className="text-sm" style={{ color: "rgba(26,31,60,.55)" }}>{link.label}</a>
+                  : <a key={link.label} href={link.href} className="text-sm" style={{ color: "rgba(26,31,60,.55)" }}>{link.label}</a>
                 )}
               </div>
             </div>
@@ -94,7 +94,7 @@ export default function Footer() {
           </p>
           <div className="flex items-center gap-5">
             {["Privacy Policy", "Terms of Service", "Cookies"].map(l => (
-              <a key={l} href__="#" className="text-xs" style={{ color: "rgba(26,31,60,.35)" }}>{l}</a>
+              <a key={l} href="#" className="text-xs" style={{ color: "rgba(26,31,60,.35)" }}>{l}</a>
             ))}
           </div>
         </div>
@@ -102,3 +102,4 @@ export default function Footer() {
     </footer>
   );
 }
+

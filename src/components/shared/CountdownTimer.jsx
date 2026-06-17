@@ -60,3 +60,4 @@ export default function CountdownTimer({ targetDate, label, compact = false }) {
     </div>
   );
 }
+

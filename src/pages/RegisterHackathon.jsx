@@ -116,7 +116,7 @@ export default function RegisterHackathon() {
               </button>
             </div>
           </div>
-          <a href__="/participant">
+          <a href="/participant">
             <button className="btn-primary flex items-center gap-2 px-8 py-3 rounded-full text-sm mx-auto">
               Go to Dashboard <ArrowRight className="w-4 h-4" aria-hidden="true" />
             </button>
@@ -284,3 +284,4 @@ export default function RegisterHackathon() {
     </PageShell>
   );
 }
+

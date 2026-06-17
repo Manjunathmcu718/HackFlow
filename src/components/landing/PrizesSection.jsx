@@ -96,3 +96,4 @@ export default function PrizesSection({ hackathon }) {
     </section>
   );
 }
+

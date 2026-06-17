@@ -80,3 +80,4 @@ export default function SponsorsSection({ sponsors }) {
     </section>
   );
 }
+
