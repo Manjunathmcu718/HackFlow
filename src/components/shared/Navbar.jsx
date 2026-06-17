@@ -1,43 +1,118 @@
-import { useState } from "react"
-import { Link, useLocation } from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet"
-import { Menu, Zap } from "lucide-react"
+﻿import React, { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Menu, X, ArrowUpRight } from "lucide-react";
+import { motion } from "framer-motion";
 
-const links = [
-  { label: "Hackathons", path: "/hackathons" },
-  { label: "Leaderboard", path: "/leaderboard" },
-  { label: "Dashboard", path: "/participant" },
-  { label: "Judge Panel", path: "/judge" },
-  { label: "Organizer", path: "/organizer" },
-]
+const NAV_LINKS = [
+  { label: "Hackathons",  to: "/hackathons" },
+  { label: "Leaderboard", to: "/leaderboard" },
+  { label: "Dashboard",   to: "/participant" },
+  { label: "Judge",       to: "/judge" },
+  { label: "Organizer",   to: "/organizer" },
+];
 
 export default function Navbar() {
-  const loc = useLocation()
-  const [open, setOpen] = useState(false)
-  const active = (p) => loc.pathname.startsWith(p)
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", fn, { passive: true });
+    return () => window.removeEventListener("scroll", fn);
+  }, []);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center"><Zap className="w-4 h-4 text-primary-foreground" /></div>
-          <span className="font-heading font-bold text-lg tracking-tight">BeetleX</span>
+    <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+      style={scrolled
+        ? { background:"rgba(250,248,245,.92)", backdropFilter:"blur(20px)", borderBottom:"1px solid rgba(0,0,0,.07)", boxShadow:"0 2px 20px rgba(0,0,0,.06)" }
+        : { background:"transparent" }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-6">
+
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
+          <img
+            src="https://media.base44.com/images/public/6a305537a00d359b98abca78/72a43bdc6_e7d2cace-e670-4649-9142-fdd4a25f4013_ChatGPT-Image-May-29--2026--07-44-55-PM.webp"
+            alt="BeetleX"
+            className="w-12 h-12 rounded-full object-cover flex-shrink-0 transition-transform duration-300 group-hover:scale-110"
+            style={{ boxShadow:"0 0 14px rgba(155,48,255,.8), 0 0 32px rgba(155,48,255,.4)" }}
+          />
+          <span style={{ fontFamily:"'Syne', sans-serif", fontWeight:800, fontSize:"19px", letterSpacing:"-0.5px", color:"#0f0f0f" }}>
+            Beetle<span style={{ color:"#7C3AED", animation:"text-blink-anim 1.8s ease-in-out infinite" }}>X</span>
+          </span>
         </Link>
-        <div className="hidden md:flex items-center gap-1">
-          {links.map(l => <Link key={l.path} to={l.path} className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${active(l.path) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}>{l.label}</Link>)}
-        </div>
-        <div className="hidden md:block"><Link to="/register-hackathon"><Button size="sm" className="rounded-full px-5 font-semibold">Register Now</Button></Link></div>
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger className="md:hidden"><Button variant="ghost" size="icon"><Menu className="w-5 h-5" /></Button></SheetTrigger>
-          <SheetContent>
-            <div className="flex flex-col gap-2 mt-8">
-              {links.map(l => <Link key={l.path} to={l.path} onClick={() => setOpen(false)} className={`px-4 py-3 rounded-lg text-sm font-medium ${active(l.path) ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}>{l.label}</Link>)}
-              <Link to="/register-hackathon" onClick={() => setOpen(false)}><Button className="w-full mt-4 rounded-full font-semibold">Register Now</Button></Link>
-            </div>
-          </SheetContent>
-        </Sheet>
+
+        <style>{`
+          @keyframes text-blink-anim {
+            0%,100% { opacity:1; text-shadow:0 0 8px rgba(124,58,237,.7); }
+            45%     { opacity:1; }
+            50%     { opacity:0; text-shadow:none; }
+            55%     { opacity:0; }
+            60%     { opacity:1; }
+          }
+        `}</style>
+
+        {/* Desktop nav */}
+        <nav className="hidden md:flex items-center gap-1 rounded-2xl px-2 py-1.5"
+          style={{ background:"rgba(26,31,60,.04)", border:"1px solid rgba(26,31,60,.07)" }}>
+          {NAV_LINKS.map(({ label, to }) => {
+            const active = pathname === to || (to !== "/" && pathname.startsWith(to));
+            return (
+              <Link key={to} to={to}
+                className="relative px-4 py-1.5 rounded-xl text-sm font-semibold transition-colors duration-200"
+                style={{ color: active ? "#F4622A" : "rgba(26,31,60,.55)" }}>
+                {active && (
+                  <motion.span layoutId="nav-active" className="absolute inset-0 rounded-xl"
+                    style={{ background:"rgba(244,98,42,.08)", border:"1px solid rgba(244,98,42,.2)" }}
+                    transition={{ type:"spring", stiffness:450, damping:32 }} />
+                )}
+                <span className="relative z-10">{label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* CTA */}
+        <Link to="/register-hackathon" className="hidden md:flex">
+          <button className="btn-primary flex items-center gap-1.5 px-5 py-2.5 text-sm">
+            Register Now <ArrowUpRight className="w-3.5 h-3.5" />
+          </button>
+        </Link>
+
+        {/* Mobile menu button */}
+        <button className="md:hidden p-2 rounded-xl"
+          style={{ color:"rgba(26,31,60,.6)", background:"rgba(26,31,60,.05)", border:"1px solid rgba(26,31,60,.08)" }}
+          onClick={() => setOpen(!open)}>
+          {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
       </div>
-    </nav>
-  )
+
+      {/* Mobile drawer */}
+      {open && (
+        <div className="md:hidden px-4 pb-4 pt-2"
+          style={{ background:"#FAF8F5", borderBottom:"1px solid rgba(0,0,0,.07)" }}>
+          <div className="flex flex-col gap-2">
+            {NAV_LINKS.map(({ label, to }) => {
+              const active = pathname === to || (to !== "/" && pathname.startsWith(to));
+              return (
+                <Link key={to} to={to} onClick={() => setOpen(false)}
+                  className="px-5 py-3 rounded-2xl text-sm font-semibold transition-all"
+                  style={active
+                    ? { background:"rgba(244,98,42,.1)", border:"1px solid rgba(244,98,42,.2)", color:"#F4622A" }
+                    : { background:"rgba(26,31,60,.04)", border:"1px solid rgba(26,31,60,.06)", color:"rgba(26,31,60,.65)" }}>
+                  {label}
+                </Link>
+              );
+            })}
+            <Link to="/register-hackathon" onClick={() => setOpen(false)} className="mt-2">
+              <button className="btn-primary w-full flex items-center justify-center gap-2 px-5 py-3 text-sm">
+                Register Now <ArrowUpRight className="w-4 h-4" />
+              </button>
+            </Link>
+          </div>
+        </div>
+      )}
+    </header>
+  );
 }
+

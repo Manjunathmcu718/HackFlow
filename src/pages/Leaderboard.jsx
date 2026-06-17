@@ -1,31 +1,134 @@
-import { useState } from "react"
-import PageShell from "@/components/shared/PageShell"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Trophy, Medal, Star, ExternalLink, Github, Lock } from "lucide-react"
-import { motion } from "framer-motion"
-import { hackathons, submissions } from "@/lib/mockData"
+﻿import React, { useState } from "react";
+import { hackathons, submissions } from "../lib/mockData";
+import PageShell from "../components/shared/PageShell";
+import { Trophy, Medal, Star, ExternalLink, Github, Lock } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function Leaderboard() {
-  const [trackFilter, setTrackFilter] = useState("all")
-  const hackathon = hackathons.find(h => h.status === "active") || hackathons[0]
+  const [trackFilter, setTrackFilter] = useState("all");
+  const hackathon = hackathons.find(h => h.status==="active") || hackathons[0];
 
-  if (!hackathon?.leaderboard_published) return <PageShell><div className="max-w-lg mx-auto px-4 py-20 text-center"><div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-6"><Lock className="w-8 h-8 text-muted-foreground" /></div><h1 className="font-heading text-2xl font-bold mb-3">Leaderboard Not Published</h1><p className="text-muted-foreground">Results will appear once organizers publish the leaderboard.</p></div></PageShell>
+  if (!hackathon?.leaderboard_published) return (
+    <PageShell>
+      <div className="max-w-lg mx-auto px-4 py-20 text-center">
+        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background:"rgba(26,31,60,.08)" }}>
+          <Lock className="w-8 h-8" style={{ color:"rgba(26,31,60,.4)" }} />
+        </div>
+        <h1 className="font-heading text-2xl font-bold mb-3" style={{ color:"#1A1F3C" }}>Leaderboard Not Yet Published</h1>
+        <p style={{ color:"rgba(26,31,60,.5)" }}>Results will be visible once the organizers publish the leaderboard.</p>
+      </div>
+    </PageShell>
+  );
 
-  const ranked = submissions.filter(s => s.status === "submitted").filter(s => trackFilter === "all" || s.track === trackFilter).sort((a, b) => b.average_score - a.average_score)
-  const tracks = [...new Set(submissions.map(s => s.track).filter(Boolean))]
+  const ranked = submissions
+    .filter(s => s.status==="submitted" && s.average_score > 0)
+    .filter(s => trackFilter==="all" || s.track===trackFilter)
+    .sort((a,b) => b.average_score - a.average_score);
 
-  const rs = [{ bg: "bg-amber-500/10 border-amber-500/30", text: "text-amber-400", icon: Trophy }, { bg: "bg-slate-400/10 border-slate-400/30", text: "text-slate-300", icon: Medal }, { bg: "bg-orange-500/10 border-orange-500/30", text: "text-orange-400", icon: Medal }]
+  const tracks = [...new Set(submissions.map(s => s.track).filter(Boolean))];
+
+  const podiumData = [
+    { accent:"#F59E0B", bg:"rgba(245,158,11,.1)", border:"rgba(245,158,11,.35)", icon:Trophy },
+    { accent:"#94A3B8", bg:"rgba(148,163,184,.1)", border:"rgba(148,163,184,.35)", icon:Medal },
+    { accent:"#F97316", bg:"rgba(249,115,22,.1)",  border:"rgba(249,115,22,.35)",  icon:Medal },
+  ];
 
   return (
     <PageShell>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
-        <div className="text-center mb-10"><h1 className="font-heading text-3xl sm:text-4xl font-bold tracking-tight mb-3 flex items-center justify-center gap-2"><Trophy className="w-7 h-7 text-primary" /> Leaderboard</h1><p className="text-muted-foreground">{hackathon?.title} - Live Rankings</p></div>
-        <div className="flex justify-center mb-8"><Select value={trackFilter} onValueChange={setTrackFilter}><SelectTrigger className="w-56"><SelectValue placeholder="All Tracks" /></SelectTrigger><SelectContent><SelectItem value="all">All Tracks</SelectItem>{tracks.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
-        {ranked.length >= 3 && <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-10">{[1, 0, 2].map(idx => { const s = ranked[idx]; if (!s) return null; const style = rs[idx]; const I = style.icon; return (<motion.div key={s.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }} className={`rounded-2xl border p-4 sm:p-6 text-center ${style.bg} ${idx === 0 ? "sm:-mt-4" : ""}`}><div className={`w-10 h-10 rounded-full ${style.bg} flex items-center justify-center mx-auto mb-3`}><I className={`w-5 h-5 ${style.text}`} /></div><p className={`text-3xl sm:text-4xl font-bold font-mono ${style.text}`}>#{idx + 1}</p><h3 className="font-semibold mt-2 text-sm sm:text-base truncate">{s.team_name}</h3><p className="text-xs text-muted-foreground truncate mb-2">{s.project_title}</p><p className="text-lg font-mono font-bold">{s.average_score}<span className="text-xs text-muted-foreground">/40</span></p></motion.div>)})}</div>}
-        <div className="space-y-3">{ranked.map((s, i) => (<motion.div key={s.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}><Card className={`overflow-hidden transition-all hover:shadow-sm ${i < 3 ? "border-primary/20" : ""}`}><CardContent className="p-4 flex items-center gap-4"><span className={`w-10 h-10 rounded-xl flex items-center justify-center font-mono font-bold text-sm shrink-0 ${i === 0 ? "bg-amber-500/10 text-amber-400" : i === 1 ? "bg-slate-400/10 text-slate-300" : i === 2 ? "bg-orange-500/10 text-orange-400" : "bg-muted text-muted-foreground"}`}>#{i + 1}</span><div className="flex-1 min-w-0"><div className="flex items-center gap-2 flex-wrap"><h3 className="font-semibold text-sm truncate">{s.team_name}</h3><Badge variant="secondary" className="text-[10px]">{s.track}</Badge></div><p className="text-xs text-muted-foreground truncate">{s.project_title}</p></div><div className="flex items-center gap-3 shrink-0">{s.demo_url && <a href={s.demo_url} target="_blank" className="text-muted-foreground hover:text-primary"><ExternalLink className="w-4 h-4" /></a>}{s.github_url && <a href={s.github_url} target="_blank" className="text-muted-foreground hover:text-primary"><Github className="w-4 h-4" /></a>}<div className="text-right"><p className="text-lg font-mono font-bold">{s.average_score}</p><div className="flex items-center gap-0.5"><Star className="w-3 h-3 text-amber-400" /><span className="text-[10px] text-muted-foreground">{s.scores?.length} reviews</span></div></div></div></CardContent></Card></motion.div>))}</div>
+        {/* Header card */}
+        <div className="relative overflow-hidden rounded-3xl mb-10 p-8 sm:p-12 text-center"
+          style={{ background:"linear-gradient(135deg,#FFF5EF 0%,#F5F0FF 50%,#F0FAFF 100%)", border:"1px solid rgba(0,0,0,.06)" }}>
+          <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
+          <div className="absolute top-0 right-0 w-56 h-56 rounded-full pointer-events-none"
+            style={{ background:"radial-gradient(ellipse,rgba(244,98,42,.12) 0%,transparent 70%)", filter:"blur(40px)" }} />
+          <div className="relative">
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
+              style={{ background:"linear-gradient(135deg,#F59E0B,#F97316)", boxShadow:"0 8px 28px rgba(245,158,11,.4)" }}>
+              <Trophy className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="font-heading font-extrabold text-4xl sm:text-5xl tracking-tight mb-2" style={{ color:"#1A1F3C" }}>Leaderboard</h1>
+            <p className="text-base font-semibold" style={{ color:"rgba(26,31,60,.55)" }}>{hackathon?.title} -- Live Rankings</p>
+          </div>
+        </div>
+
+        {/* Track filter */}
+        <div className="flex justify-center mb-8">
+          <select value={trackFilter} onChange={e => setTrackFilter(e.target.value)}
+            className="h-11 rounded-2xl px-5 text-sm font-semibold outline-none"
+            style={{ background:"#fff", border:"1.5px solid rgba(244,98,42,.3)", color:"#1A1F3C", boxShadow:"0 2px 8px rgba(0,0,0,.06)" }}>
+            <option value="all">All Tracks</option>
+            {tracks.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+        </div>
+
+        {/* Top 3 Podium */}
+        {ranked.length >= 3 && (
+          <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-10">
+            {[1,0,2].map(idx => {
+              const s = ranked[idx]; if (!s) return null;
+              const p = podiumData[idx];
+              return (
+                <motion.div key={s.id} initial={{ opacity:0,y:20 }} animate={{ opacity:1,y:0 }} transition={{ delay:idx*.1 }}
+                  className={`rounded-2xl p-4 sm:p-6 text-center ${idx===0?"sm:-mt-4":""}`}
+                  style={{ background:p.bg, border:`2px solid ${p.border}` }}>
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3"
+                    style={{ background:p.bg, border:`1.5px solid ${p.border}` }}>
+                    <p.icon className="w-5 h-5" style={{ color:p.accent }} />
+                  </div>
+                  <p className="text-3xl sm:text-4xl font-bold font-mono" style={{ color:p.accent }}>#{idx+1}</p>
+                  <h3 className="font-bold mt-2 text-sm sm:text-base" style={{ color:"#1A1F3C" }}>{s.team_name}</h3>
+                  <p className="text-xs mt-0.5 mb-3 truncate" style={{ color:"rgba(26,31,60,.55)" }}>{s.project_title}</p>
+                  <p className="text-xl font-mono font-extrabold" style={{ color:p.accent }}>
+                    {s.average_score}<span className="text-xs font-normal" style={{ color:"rgba(26,31,60,.45)" }}>/40</span>
+                  </p>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Full list */}
+        <div className="space-y-3">
+          {ranked.map((s,i) => {
+            const rankColor = i===0?"#F59E0B":i===1?"#94A3B8":i===2?"#F97316":"rgba(26,31,60,.3)";
+            const rankBg    = i===0?"rgba(245,158,11,.1)":i===1?"rgba(148,163,184,.12)":i===2?"rgba(249,115,22,.1)":"rgba(26,31,60,.05)";
+            return (
+              <motion.div key={s.id} initial={{ opacity:0,y:10 }} animate={{ opacity:1,y:0 }} transition={{ delay:i*.03 }}>
+                <div className="rounded-2xl p-4 flex items-center gap-4"
+                  style={{ background:"#fff", border:i<3?`1.5px solid ${rankColor}40`:"1px solid rgba(26,31,60,.09)", boxShadow:"0 2px 8px rgba(0,0,0,.04)" }}>
+                  <span className="w-10 h-10 rounded-xl flex items-center justify-center font-mono font-extrabold text-sm shrink-0"
+                    style={{ background:rankBg, color:rankColor }}>#{i+1}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-bold text-sm" style={{ color:"#1A1F3C" }}>{s.team_name}</h3>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full pill-violet">{s.track}</span>
+                    </div>
+                    <p className="text-xs mt-0.5 truncate" style={{ color:"rgba(26,31,60,.5)" }}>{s.project_title}</p>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    {s.demo_url && <a href={s.demo_url} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-4 h-4" style={{ color:"rgba(26,31,60,.4)" }} /></a>}
+                    {s.github_url && <a href={s.github_url} target="_blank" rel="noopener noreferrer"><Github className="w-4 h-4" style={{ color:"rgba(26,31,60,.4)" }} /></a>}
+                    <div className="text-right">
+                      <p className="text-xl font-mono font-extrabold" style={{ color:"#F4622A" }}>{s.average_score}</p>
+                      <div className="flex items-center gap-0.5 justify-end">
+                        <Star className="w-3 h-3" style={{ color:"#F59E0B" }} />
+                        <span className="text-[10px] font-semibold" style={{ color:"rgba(26,31,60,.45)" }}>{s.scores?.length||0} reviews</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+          {ranked.length===0 && (
+            <div className="text-center py-16">
+              <p style={{ color:"rgba(26,31,60,.4)" }}>No scored submissions yet for this track.</p>
+            </div>
+          )}
+        </div>
       </div>
     </PageShell>
-  )
+  );
 }
+

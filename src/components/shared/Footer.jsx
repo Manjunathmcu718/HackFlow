@@ -1,32 +1,140 @@
-import { Link } from "react-router-dom"
-import { Zap, Github, Twitter, Linkedin, Mail } from "lucide-react"
+﻿import React from "react";
+import { Link } from "react-router-dom";
+import { Github, Twitter, Linkedin, Mail, ArrowUpRight } from "lucide-react";
+import { motion } from "framer-motion";
 
-const socials = [{ icon: Github, href: "#" }, { icon: Twitter, href: "#" }, { icon: Linkedin, href: "#" }, { icon: Mail, href: "mailto:hello@beetlex.dev" }]
+const footerLinks = {
+  Platform: [
+    { label: "Browse Hackathons", path: "/hackathons" },
+    { label: "Leaderboard",       path: "/leaderboard" },
+    { label: "Participant Hub",   path: "/participant" },
+    { label: "Judge Panel",       path: "/judge" },
+  ],
+  Resources: [
+    { label: "Documentation",     href: "#" },
+    { label: "API Reference",     href: "#" },
+    { label: "Community Discord", href: "#" },
+    { label: "Blog",              href: "#" },
+  ],
+};
+
+const socials = [
+  { icon: Github,   href: "#", label: "GitHub" },
+  { icon: Twitter,  href: "#", label: "Twitter" },
+  { icon: Linkedin, href: "#", label: "LinkedIn" },
+  { icon: Mail,     href: "mailto:hello@beetlex.io", label: "Email" },
+];
 
 export default function Footer() {
   return (
-    <footer className="border-t border-border bg-card/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div>
-            <Link to="/" className="flex items-center gap-2 mb-3"><div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-primary-foreground" /></div><span className="font-heading font-bold">BeetleX</span></Link>
-            <p className="text-sm text-muted-foreground">Empowering the next generation of Web3 and AI builders through world-class hackathons.</p>
-          </div>
-          <div>
-            <h4 className="font-semibold text-sm mb-4">Quick Links</h4>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <Link to="/hackathons" className="block hover:text-foreground">Hackathons</Link>
-              <Link to="/leaderboard" className="block hover:text-foreground">Leaderboard</Link>
-              <Link to="/participant" className="block hover:text-foreground">Dashboard</Link>
+    <footer className="relative overflow-hidden"
+      style={{ background:"linear-gradient(180deg,#FFF5EF 0%,#FAF8F5 100%)", borderTop:"1px solid rgba(244,98,42,.12)" }}>
+
+      {/* CTA strip */}
+      <div className="border-b" style={{ borderColor:"rgba(244,98,42,.1)" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div>
+              <h3 className="font-heading text-2xl sm:text-3xl font-extrabold mb-2" style={{ color:"#1A1F3C" }}>
+                Ready to build the future?
+              </h3>
+              <p style={{ color:"rgba(26,31,60,.5)" }}>Join 2,800+ builders shipping at BeetleX.</p>
             </div>
-          </div>
-          <div>
-            <h4 className="font-semibold text-sm mb-4">Connect</h4>
-            <div className="flex gap-3">{socials.map(({ icon: I, href }) => <a key={href} href={href} className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center hover:bg-primary/10 hover:text-primary transition-colors"><I className="w-4 h-4" /></a>)}</div>
+            <Link to="/register-hackathon">
+              <motion.button whileHover={{ scale:1.05 }} whileTap={{ scale:.97 }}
+                className="btn-primary flex items-center gap-2 px-7 py-3.5 text-base">
+                Register Now <ArrowUpRight className="w-4 h-4" />
+              </motion.button>
+            </Link>
           </div>
         </div>
-        <div className="mt-8 pt-8 border-t border-border text-center text-xs text-muted-foreground">&copy; {new Date().getFullYear()} BeetleX. All rights reserved.</div>
+      </div>
+
+      {/* Main grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+          {/* Brand */}
+          <div className="md:col-span-1">
+            <Link to="/" className="flex items-center gap-2.5 mb-5 group">
+              <img
+                src="https://media.base44.com/images/public/6a305537a00d359b98abca78/72a43bdc6_e7d2cace-e670-4649-9142-fdd4a25f4013_ChatGPT-Image-May-29--2026--07-44-55-PM.webp"
+                alt="BeetleX"
+                className="w-10 h-10 rounded-full object-cover group-hover:scale-110 transition-transform"
+                style={{ boxShadow:"0 0 12px rgba(155,48,255,.7)" }}
+              />
+              <span className="font-heading font-extrabold text-xl" style={{ color:"#1A1F3C" }}>BeetleX</span>
+            </Link>
+            <p className="text-sm leading-relaxed mb-6" style={{ color:"rgba(26,31,60,.5)" }}>
+              Developer-first platform building tools, communities, and experiences across Web3 and AI.
+            </p>
+            <div className="flex items-center gap-2">
+              {socials.map(({ icon: Icon, href, label }) => (
+                <motion.a key={label} href={href} aria-label={label} whileHover={{ scale:1.1, y:-2 }}
+                  className="w-9 h-9 rounded-xl flex items-center justify-center transition-all"
+                  style={{ background:"rgba(26,31,60,.06)", border:"1px solid rgba(26,31,60,.08)", color:"rgba(26,31,60,.45)" }}
+                  onMouseEnter={e => { e.currentTarget.style.background="rgba(244,98,42,.1)"; e.currentTarget.style.color="#F4622A"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background="rgba(26,31,60,.06)"; e.currentTarget.style.color="rgba(26,31,60,.45)"; }}>
+                  <Icon className="w-4 h-4" />
+                </motion.a>
+              ))}
+            </div>
+          </div>
+
+          {/* Links */}
+          {Object.entries(footerLinks).map(([section, links]) => (
+            <div key={section}>
+              <h4 className="font-heading font-bold text-sm mb-5 uppercase tracking-wider" style={{ color:"rgba(26,31,60,.5)" }}>{section}</h4>
+              <div className="flex flex-col gap-3">
+                {links.map((link) =>
+                  link.path ? (
+                    <Link key={link.label} to={link.path}
+                      className="text-sm group flex items-center gap-1 transition-colors"
+                      style={{ color:"rgba(26,31,60,.55)" }}
+                      onMouseEnter={e => e.currentTarget.style.color="#F4622A"}
+                      onMouseLeave={e => e.currentTarget.style.color="rgba(26,31,60,.55)"}>
+                      {link.label} <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity" />
+                    </Link>
+                  ) : (
+                    <a key={link.label} href={link.href}
+                      className="text-sm group flex items-center gap-1 transition-colors"
+                      style={{ color:"rgba(26,31,60,.55)" }}
+                      onMouseEnter={e => e.currentTarget.style.color="#F4622A"}
+                      onMouseLeave={e => e.currentTarget.style.color="rgba(26,31,60,.55)"}>
+                      {link.label} <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity" />
+                    </a>
+                  )
+                )}
+              </div>
+            </div>
+          ))}
+
+          {/* Status */}
+          <div>
+            <h4 className="font-heading font-bold text-sm mb-5 uppercase tracking-wider" style={{ color:"rgba(26,31,60,.5)" }}>System Status</h4>
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl w-fit mb-4 pill-teal">
+              <div className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+              <span className="text-xs font-medium">All systems operational</span>
+            </div>
+            <p className="text-xs" style={{ color:"rgba(26,31,60,.35)" }}>Hackathon Season 2025</p>
+          </div>
+        </div>
+
+        <div className="mt-14 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4"
+          style={{ borderTop:"1px solid rgba(26,31,60,.07)" }}>
+          <p className="text-xs" style={{ color:"rgba(26,31,60,.35)" }}>Â© 2025 BeetleX. All rights reserved.</p>
+          <div className="flex items-center gap-5">
+            {["Privacy Policy","Terms of Service","Cookies"].map(l => (
+              <a key={l} href="#" className="text-xs transition-colors"
+                style={{ color:"rgba(26,31,60,.35)" }}
+                onMouseEnter={e => e.currentTarget.style.color="#F4622A"}
+                onMouseLeave={e => e.currentTarget.style.color="rgba(26,31,60,.35)"}>
+                {l}
+              </a>
+            ))}
+          </div>
+        </div>
       </div>
     </footer>
-  )
+  );
 }
+

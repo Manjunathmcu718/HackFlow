@@ -1,71 +1,225 @@
-import { Link } from "react-router-dom"
-import PageShell from "@/components/shared/PageShell"
-import StatusBadge from "@/components/shared/StatusBadge"
-import CountdownTimer from "@/components/shared/CountdownTimer"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Users, Copy, Send, Trophy, ExternalLink, Megaphone, BookOpen, Clock, ArrowRight, AlertTriangle } from "lucide-react"
-import { format } from "date-fns"
-import { hackathons, teams, submissions, announcements } from "@/lib/mockData"
+﻿import React from "react";
+import { Link } from "react-router-dom";
+import { hackathons, teams, submissions, announcements } from "../lib/mockData";
+import PageShell from "../components/shared/PageShell";
+import StatusBadge from "../components/shared/StatusBadge";
+import CountdownTimer from "../components/shared/CountdownTimer";
+import { Users, Copy, Send, Trophy, ExternalLink, Megaphone, BookOpen, Clock, ArrowRight, AlertTriangle } from "lucide-react";
+import { format } from "date-fns";
+
+const LightCard = ({ children, className="", style={} }) => (
+  <div className={`rounded-2xl ${className}`}
+    style={{ background:"#fff", border:"1px solid rgba(26,31,60,.08)", boxShadow:"0 2px 12px rgba(0,0,0,.05)", ...style }}>
+    {children}
+  </div>
+);
 
 export default function ParticipantDashboard() {
-  const hackathon = hackathons.find(h => h.status === "active") || hackathons[0]
-  const team = teams[0]
-  const sub = submissions.find(s => s.team_id === team?.id)
+  const hackathon     = hackathons.find(h => h.status==="active") || hackathons[0];
+  const team          = teams[0];
+  const teamSubmission = submissions.find(s => s.team_id === team?.id);
+  const notices       = announcements.filter(a => a.hackathon_id === hackathon?.id);
 
-  const lb = submissions.filter(s => s.status === "submitted" && s.average_score > 0).sort((a, b) => b.average_score - a.average_score)
-  const rank = lb.findIndex(s => s.team_id === team?.id) + 1
+  const priorityIcon  = { urgent:AlertTriangle, warning:Clock, info:Megaphone };
+  const priorityColor = { urgent:"#F43F5E", warning:"#F59E0B", info:"#3B82F6" };
 
-  const pi = { urgent: AlertTriangle, warning: Clock, info: Megaphone }
-  const pc = { urgent: "text-destructive", warning: "text-amber-400", info: "text-blue-400" }
+  const leaderboardData = submissions
+    .filter(s => s.status==="submitted" && s.average_score > 0)
+    .sort((a,b) => b.average_score - a.average_score);
+  const myRank = leaderboardData.findIndex(s => s.team_id === team?.id) + 1;
+
+  const rankStyle = (i) => ({
+    bg:    i===0?"rgba(245,158,11,.15)":i===1?"rgba(148,163,184,.15)":i===2?"rgba(249,115,22,.15)":"rgba(26,31,60,.07)",
+    color: i===0?"#D97706":i===1?"#64748B":i===2?"#EA580C":"rgba(26,31,60,.5)",
+  });
 
   return (
     <PageShell>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="mb-8"><h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight mb-1">Participant Dashboard</h1><p className="text-muted-foreground">{hackathon?.title}</p></div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader className="pb-3"><div className="flex items-center justify-between"><CardTitle className="text-base flex items-center gap-2"><Users className="w-4 h-4 text-primary" /> Team Overview</CardTitle><StatusBadge status={team?.submission_status || "not_started"} /></div></CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between mb-4"><div><h3 className="font-semibold text-lg">{team?.name}</h3><p className="text-xs text-muted-foreground">Track: {team?.track}</p></div><Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => navigator.clipboard.writeText(team?.invite_code || "")}>{team?.invite_code} <Copy className="w-3 h-3" /></Button></div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{(team?.members || []).map((m, i) => <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50"><div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">{m.name?.charAt(0)}</div><div><p className="text-sm font-medium">{m.name}</p><p className="text-xs text-muted-foreground">{m.role}</p></div></div>)}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-3"><div className="flex items-center justify-between"><CardTitle className="text-base flex items-center gap-2"><Send className="w-4 h-4 text-primary" /> Submission</CardTitle><StatusBadge status={sub?.status || "draft"} /></div></CardHeader>
-              <CardContent>
-                {sub ? <><h3 className="font-semibold mb-1">{sub.project_title}</h3><p className="text-sm text-muted-foreground mb-3 line-clamp-2">{sub.description}</p><div className="flex flex-wrap gap-1.5 mb-4">{(sub.tech_stack || []).map(t => <Badge key={t} variant="secondary" className="text-xs">{t}</Badge>)}</div></> : <div className="text-center py-4"><p className="text-sm text-muted-foreground mb-3">No submission yet.</p></div>}
-                <Link to="/submit"><Button className="w-full rounded-lg gap-2">{sub ? "Edit Submission" : "Start Submission"} <ArrowRight className="w-4 h-4" /></Button></Link>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><Megaphone className="w-4 h-4 text-primary" /> Announcements</CardTitle></CardHeader>
-              <CardContent>
-                <div className="space-y-3">{announcements.slice(0, 5).map(a => { const I = pi[a.priority] || Megaphone; return (<div key={a.id} className="flex gap-3 p-3 rounded-lg bg-muted/50"><I className={`w-4 h-4 mt-0.5 shrink-0 ${pc[a.priority] || "text-muted-foreground"}`} /><div><div className="flex items-center gap-2"><p className="text-sm font-semibold">{a.title}</p><StatusBadge status={a.priority} /></div><p className="text-xs text-muted-foreground mt-0.5">{a.message}</p><p className="text-[10px] text-muted-foreground mt-1">{a.created_date ? format(new Date(a.created_date), "MMM d, h:mm a") : ""}</p></div></div>)})}</div>
-              </CardContent>
-            </Card>
+      {/* Header */}
+      <div className="relative overflow-hidden pt-28 pb-12" style={{ background:"linear-gradient(135deg,#FFF5EF 0%,#FFFBF0 60%,#F5FFF8 100%)" }}>
+        <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+              style={{ background:"linear-gradient(135deg,#F4622A,#FB923C)", boxShadow:"0 8px 28px rgba(244,98,42,.4)" }}>
+              <Users className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <h1 className="font-heading font-extrabold text-3xl sm:text-4xl tracking-tight" style={{ color:"#1A1F3C" }}>Participant Dashboard</h1>
+              <p className="text-base font-semibold mt-0.5" style={{ color:"rgba(26,31,60,.55)" }}>{hackathon?.title}</p>
+            </div>
           </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main */}
+          <div className="lg:col-span-2 space-y-6">
+
+            {/* Team */}
+            <LightCard>
+              <div className="p-5 pb-3 flex items-center justify-between border-b" style={{ borderColor:"rgba(26,31,60,.07)" }}>
+                <div className="flex items-center gap-2 font-semibold text-sm" style={{ color:"#1A1F3C" }}>
+                  <Users className="w-4 h-4" style={{ color:"#F4622A" }} /> Team Overview
+                </div>
+                <StatusBadge status={team?.submission_status||"not_started"} />
+              </div>
+              <div className="p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="font-bold text-lg" style={{ color:"#1A1F3C" }}>{team?.name||"Your Team"}</h3>
+                    <p className="text-xs font-medium" style={{ color:"rgba(26,31,60,.5)" }}>Track: {team?.track}</p>
+                  </div>
+                  <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold"
+                    style={{ background:"rgba(244,98,42,.08)", border:"1px solid rgba(244,98,42,.2)", color:"#F4622A" }}
+                    onClick={() => navigator.clipboard.writeText(team?.invite_code||"")}>
+                    <Copy className="w-3 h-3" /> {team?.invite_code}
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {(team?.members||[]).map((m,i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 rounded-xl"
+                      style={{ background:"rgba(244,98,42,.04)", border:"1px solid rgba(244,98,42,.1)" }}>
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-extrabold text-white flex-shrink-0"
+                        style={{ background:"linear-gradient(135deg,#F4622A,#FB923C)" }}>
+                        {m.name?.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold" style={{ color:"#1A1F3C" }}>{m.name}</p>
+                        <p className="text-xs" style={{ color:"rgba(26,31,60,.5)" }}>{m.role}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </LightCard>
+
+            {/* Submission */}
+            <LightCard>
+              <div className="p-5 pb-3 flex items-center justify-between border-b" style={{ borderColor:"rgba(26,31,60,.07)" }}>
+                <div className="flex items-center gap-2 font-semibold text-sm" style={{ color:"#1A1F3C" }}>
+                  <Send className="w-4 h-4" style={{ color:"#F4622A" }} /> Submission
+                </div>
+                <StatusBadge status={teamSubmission?.status||"draft"} />
+              </div>
+              <div className="p-5">
+                {teamSubmission ? (
+                  <div className="mb-4">
+                    <h3 className="font-bold mb-1" style={{ color:"#1A1F3C" }}>{teamSubmission.project_title}</h3>
+                    <p className="text-sm line-clamp-2 mb-3" style={{ color:"rgba(26,31,60,.55)" }}>{teamSubmission.description}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {(teamSubmission.tech_stack||[]).map(t => <span key={t} className="text-xs font-semibold px-2.5 py-1 rounded-full pill-violet">{t}</span>)}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-center py-3 mb-4" style={{ color:"rgba(26,31,60,.45)" }}>No submission yet. Start building!</p>
+                )}
+                <Link to="/submit">
+                  <button className="btn-primary w-full flex items-center justify-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold">
+                    {teamSubmission ? "Edit Submission" : "Start Submission"} <ArrowRight className="w-4 h-4" />
+                  </button>
+                </Link>
+              </div>
+            </LightCard>
+
+            {/* Announcements */}
+            <LightCard>
+              <div className="p-5 pb-3 border-b" style={{ borderColor:"rgba(26,31,60,.07)" }}>
+                <div className="flex items-center gap-2 font-semibold text-sm" style={{ color:"#1A1F3C" }}>
+                  <Megaphone className="w-4 h-4" style={{ color:"#F4622A" }} /> Announcements
+                </div>
+              </div>
+              <div className="p-5 space-y-3">
+                {notices.slice(0,5).map(a => {
+                  const Icon = priorityIcon[a.priority]||Megaphone;
+                  return (
+                    <div key={a.id} className="flex gap-3 p-3 rounded-xl"
+                      style={{ background:"rgba(26,31,60,.03)", border:"1px solid rgba(26,31,60,.06)" }}>
+                      <Icon className="w-4 h-4 mt-0.5 shrink-0" style={{ color:priorityColor[a.priority]||"rgba(26,31,60,.4)" }} />
+                      <div>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <p className="text-sm font-semibold" style={{ color:"#1A1F3C" }}>{a.title}</p>
+                          <StatusBadge status={a.priority} />
+                        </div>
+                        <p className="text-xs" style={{ color:"rgba(26,31,60,.55)" }}>{a.message}</p>
+                        <p className="text-[10px] mt-1" style={{ color:"rgba(26,31,60,.35)" }}>{a.created_date ? format(new Date(a.created_date),"MMM d, h:mm a") : ""}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+                {notices.length === 0 && <p className="text-center py-6 text-sm" style={{ color:"rgba(26,31,60,.4)" }}>No announcements yet.</p>}
+              </div>
+            </LightCard>
+          </div>
+
+          {/* Sidebar */}
           <div className="space-y-6">
-            <Card><CardContent className="p-5"><CountdownTimer targetDate={hackathon?.submission_deadline} label="Submission Deadline" compact /></CardContent></Card>
-            <Card>
-              <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><Trophy className="w-4 h-4 text-primary" /> Leaderboard</CardTitle></CardHeader>
-              <CardContent>
-                {rank > 0 && <div className="p-3 rounded-lg bg-primary/5 border border-primary/10 mb-3 text-center"><p className="text-xs text-muted-foreground">Your Position</p><p className="text-2xl font-bold text-primary">#{rank}</p></div>}
-                <div className="space-y-2">{lb.slice(0, 5).map((s, i) => <div key={s.id} className="flex items-center gap-3 text-sm"><span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${i === 0 ? "bg-amber-500/10 text-amber-400" : i === 1 ? "bg-slate-400/10 text-slate-300" : i === 2 ? "bg-orange-500/10 text-orange-400" : "bg-muted text-muted-foreground"}`}>{i + 1}</span><span className="flex-1 truncate font-medium">{s.team_name}</span><span className="font-mono text-xs font-semibold">{s.average_score}</span></div>)}</div>
-                <Link to="/leaderboard"><Button variant="ghost" size="sm" className="w-full mt-3 text-xs">View Full Leaderboard</Button></Link>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><BookOpen className="w-4 h-4 text-primary" /> Resources</CardTitle></CardHeader>
-              <CardContent>
-                <div className="space-y-2">{[{ l: "API Documentation" }, { l: "Problem Statements" }, { l: "Mentor Schedule" }, { l: "Discord Community" }].map(r => <a key={r.l} href="#" className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors group"><span className="text-sm">{r.l}</span><ExternalLink className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" /></a>)}</div>
-              </CardContent>
-            </Card>
+            <div className="rounded-2xl p-5" style={{ background:"linear-gradient(135deg,#FFF5EF,#FFF0FF)", border:"1px solid rgba(244,98,42,.15)" }}>
+              <CountdownTimer targetDate={hackathon?.submission_deadline} label="Submission Deadline" compact />
+            </div>
+
+            <LightCard>
+              <div className="p-5 pb-3 border-b" style={{ borderColor:"rgba(26,31,60,.07)" }}>
+                <div className="flex items-center gap-2 font-semibold text-sm" style={{ color:"#1A1F3C" }}>
+                  <Trophy className="w-4 h-4" style={{ color:"#F59E0B" }} /> Leaderboard
+                </div>
+              </div>
+              <div className="p-5">
+                {myRank > 0 && (
+                  <div className="p-3 rounded-2xl mb-4 text-center"
+                    style={{ background:"linear-gradient(135deg,rgba(244,98,42,.08),rgba(251,146,60,.08))", border:"1px solid rgba(244,98,42,.15)" }}>
+                    <p className="text-xs font-semibold mb-0.5" style={{ color:"rgba(26,31,60,.5)" }}>Your Position</p>
+                    <p className="text-2xl font-extrabold" style={{ color:"#F4622A" }}>#{myRank}</p>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  {leaderboardData.slice(0,5).map((s,i) => {
+                    const rs = rankStyle(i);
+                    return (
+                      <div key={s.id} className="flex items-center gap-3 text-sm">
+                        <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                          style={{ background:rs.bg, color:rs.color }}>{i+1}</span>
+                        <span className="flex-1 truncate font-medium" style={{ color:"#1A1F3C" }}>{s.team_name}</span>
+                        <span className="font-mono text-xs font-bold" style={{ color:"#F4622A" }}>{s.average_score}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <Link to="/leaderboard">
+                  <button className="btn-outline w-full flex items-center justify-center gap-1 px-4 py-2.5 rounded-2xl text-xs mt-4">View Full Leaderboard</button>
+                </Link>
+              </div>
+            </LightCard>
+
+            <LightCard>
+              <div className="p-5 pb-3 border-b" style={{ borderColor:"rgba(26,31,60,.07)" }}>
+                <div className="flex items-center gap-2 font-semibold text-sm" style={{ color:"#1A1F3C" }}>
+                  <BookOpen className="w-4 h-4" style={{ color:"#F4622A" }} /> Resources
+                </div>
+              </div>
+              <div className="p-5 space-y-2">
+                {[
+                  { label:"API Documentation",  url:"#" },
+                  { label:"Problem Statements", url:"#" },
+                  { label:"Mentor Schedule",    url:"#" },
+                  { label:"Discord Community",  url:"#" },
+                ].map(r => (
+                  <a key={r.label} href={r.url}
+                    className="flex items-center justify-between p-3 rounded-xl transition-all"
+                    style={{ background:"rgba(26,31,60,.03)", border:"1px solid rgba(26,31,60,.06)" }}
+                    onMouseEnter={e => { e.currentTarget.style.background="rgba(244,98,42,.05)"; e.currentTarget.style.borderColor="rgba(244,98,42,.2)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background="rgba(26,31,60,.03)"; e.currentTarget.style.borderColor="rgba(26,31,60,.06)"; }}>
+                    <span className="text-sm font-medium" style={{ color:"#1A1F3C" }}>{r.label}</span>
+                    <ExternalLink className="w-3.5 h-3.5" style={{ color:"rgba(26,31,60,.35)" }} />
+                  </a>
+                ))}
+              </div>
+            </LightCard>
           </div>
         </div>
       </div>
     </PageShell>
-  )
+  );
 }
+
