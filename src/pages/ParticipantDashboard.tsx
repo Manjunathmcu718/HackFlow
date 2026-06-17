@@ -158,7 +158,6 @@ export default function ParticipantDashboard() {
 
           <ParticipantSidebar
             hackathon={hackathon}
-            team={team}
             leaderboardData={leaderboardData}
             myRank={myRank}
             LightCard={LightCard}

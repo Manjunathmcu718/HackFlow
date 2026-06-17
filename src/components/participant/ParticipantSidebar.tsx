@@ -1,18 +1,17 @@
 import { Link } from "react-router-dom";
 import { Trophy, BookOpen, ExternalLink } from "lucide-react";
 import CountdownTimer from "@/components/shared/CountdownTimer";
-import type { Hackathon, Submission, Team } from "@/mocks/types";
+import type { Hackathon, Submission } from "@/mocks/types";
 import type { ReactNode, CSSProperties } from "react";
 
 type ParticipantSidebarProps = {
   hackathon?: Hackathon;
-  team?: Team;
   leaderboardData: Submission[];
   myRank: number;
-  LightCard: (props: { children: ReactNode; className?: string; style?: CSSProperties }) => JSX.Element;
+  LightCard: (props: { children: ReactNode; className?: string; style?: CSSProperties }) => React.ReactElement;
 };
 
-export default function ParticipantSidebar({ hackathon, team, leaderboardData, myRank, LightCard }: ParticipantSidebarProps) {
+export default function ParticipantSidebar({ hackathon, leaderboardData, myRank, LightCard }: ParticipantSidebarProps) {
   const rankStyle = (i: number) => ({
     bg: i===0?"rgba(245,158,11,.15)":i===1?"rgba(148,163,184,.15)":i===2?"rgba(249,115,22,.15)":"rgba(26,31,60,.07)",
     color: i===0?"#D97706":i===1?"#64748B":i===2?"#EA580C":"rgba(26,31,60,.5)",

@@ -110,7 +110,18 @@ export default function SubmitProject() {
         </div>
 
         <div className="space-y-6">
-          <ProjectSubmissionFields`r`n            form={form}`r`n            techInput={techInput}`r`n            pitchFileName={pitchFileName}`r`n            setForm={setForm}`r`n            setTechInput={setTechInput}`r`n            addTech={addTech}`r`n            removeTech={removeTech}`r`n            handlePitchUpload={handlePitchUpload}`r`n            iStyle={iStyle}`r`n            cStyle={cStyle}`r`n          />
+          <ProjectSubmissionFields
+            form={form}
+            techInput={techInput}
+            pitchFileName={pitchFileName}
+            setForm={setForm}
+            setTechInput={setTechInput}
+            addTech={addTech}
+            removeTech={removeTech}
+            handlePitchUpload={handlePitchUpload}
+            iStyle={iStyle}
+            cStyle={cStyle}
+          />
 
           <div className="flex items-center gap-3 justify-end">
             <button onClick={()=>saveDraft.mutate(form)} disabled={saveDraft.isPending}

@@ -2,7 +2,7 @@
 
 Frontend implementation for the BeetleX hackathon management assignment. The app supports public discovery, registration, participant workflows, project submission, judge scoring, organizer controls, and a public leaderboard.
 
-Current implementation status: the UI flows are complete and navigable, the mock API is now MSW-backed, and the codebase is still JSX-first with `allowJs` outside the typed mock/data layer.
+Current implementation status: the UI flows are complete and navigable, the mock API is MSW-backed, route-level code splitting is enabled, and the application code is implemented in TypeScript/TSX.
 
 ## Setup
 
@@ -39,7 +39,8 @@ npm run lint
 - React Router v6 handles the required multi-page flows without a server framework.
 - TanStack Query is used for async server-like state and cache invalidation. Local component state is used for form/UI state to avoid unnecessary global state.
 - Tailwind CSS provides responsive styling and shared design tokens. The app also uses small shared components such as `PageShell`, `Navbar`, `Footer`, `StatusBadge`, and `CountdownTimer`.
-- `src/lib/mockData.js` exposes an async `api` object with simulated latency. Pages call API methods through React Query rather than reading seed data directly, so replacing the mock layer with REST endpoints is straightforward.
+- `src/lib/mockData.ts` exposes an async `api` object backed by MSW endpoints. Pages call API methods through React Query rather than reading seed data directly, so replacing the mock layer with REST endpoints is straightforward.
+- Route-level lazy loading keeps the initial bundle small while loading dashboard-heavy flows on demand.
 
 ## Mock API
 
@@ -60,11 +61,7 @@ Mutations update in-memory arrays through the service worker, so the UI behaves 
 
 ## TypeScript, Linting, Formatting
 
-The project includes `tsconfig.json` with strict mode and `allowJs` enabled, so the existing JSX code is checked by TypeScript tooling, but it is not a full `.tsx` migration.
-
-The mock API layer and MSW handlers are typed in TypeScript.
-
-A full production migration would rename files to `.tsx` and add explicit interfaces for hackathons, submissions, teams, registrations, and announcements.
+The project includes `tsconfig.json` with strict mode. Route pages, shared components, the mock API layer, MSW handlers, and domain models are typed in TypeScript.
 
 ESLint and Prettier are configured for code-quality checks and formatting.
 
@@ -76,17 +73,20 @@ The UI uses semantic page sections, labels on form fields, ARIA labels on icon-o
 
 - Auth and role guards are demo-only; routes are publicly navigable.
 - The mock API is in-memory, so data resets on refresh.
-- TypeScript strict checking is enabled through `allowJs`; the codebase is not fully migrated to `.tsx`.
-- Real-time features are represented as product-ready design in `SYSTEM_DESIGN.md`, not a live WebSocket service.
+- Real-time features are simulated with MSW-backed mutations, query invalidation, notification persistence, and leaderboard rank deltas; a production WebSocket/SSE service is described in `SYSTEM_DESIGN.md`.
 
 ## With More Time
 
-- Convert all route and component files to `.tsx` with explicit domain types.
 - Add Playwright tests for registration, submission, judge scoring, and organizer publishing.
-- Add route-level code splitting and list virtualization for very large organizer tables.
+- Add list virtualization for very large organizer tables.
+- Connect the notification and leaderboard flows to production SSE/WebSocket infrastructure.
 
 ## Bonus Features
 
-Implemented bonus feature: dark mode with persisted theme selection.
+Implemented bonus features:
 
-Not implemented: real-time notifications, AI-powered recommendations, and live leaderboard rank-delta transport.
+- Dark mode with persisted theme selection.
+- AI-style event recommendations on the event listing page, ranked by the user's recent track filter, event status, and participant interest.
+- Live leaderboard presentation with rank-delta display and smooth UI updates after score mutations.
+
+Not implemented: production WebSocket/SSE transport. The current real-time behavior is simulated through the mock API layer for local review.
