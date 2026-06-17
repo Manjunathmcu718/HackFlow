@@ -1,11 +1,13 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { api } from "@/lib/mockData";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import PageShell from "@/components/shared/PageShell";
-import StatusBadge from "@/components/shared/StatusBadge";
-import { Gavel, ExternalLink, Github, FileText, Film, Star, Check, ArrowLeft } from "lucide-react";
+import { ExternalLink, Github, FileText, Film, Check, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import JudgePanelHero from "@/components/judge/JudgePanelHero";
+import JudgeProjectCard from "@/components/judge/JudgeProjectCard";
+import JudgeDialogs from "@/components/judge/JudgeDialogs";
 import type { Submission } from "@/mocks/types";
 
 const RUBRIC = [
@@ -18,30 +20,6 @@ const RUBRIC = [
 type RubricKey = typeof RUBRIC[number]["key"];
 
 type ScoreMap = Record<RubricKey, number>;
-
-function ProjectCard({ sub, onClick }: { sub: Submission; onClick: (submission: Submission) => void }) {
-  return (
-    <article onClick={() => onClick(sub)} className="card-light p-5 rounded-2xl cursor-pointer">
-      <div className="flex items-start justify-between mb-2">
-        <h3 className="font-heading font-bold text-sm" style={{ color:"#1A1F3C" }}>{sub.project_title}</h3>
-        <StatusBadge status={sub.scores?.length>0?"scored":"unscored"} />
-      </div>
-      <p className="text-xs line-clamp-2 mb-3" style={{ color:"rgba(26,31,60,.5)" }}>{sub.description}</p>
-      <div className="flex items-center justify-between">
-        <div className="flex flex-wrap gap-1">
-          {(sub.tech_stack||[]).slice(0,3).map(t=><span key={t} className="text-[10px] font-semibold px-2 py-0.5 rounded-full pill-violet">{t}</span>)}
-        </div>
-        <span className="text-xs font-medium" style={{ color:"rgba(26,31,60,.4)" }}>{sub.team_name}</span>
-      </div>
-      {sub.average_score>0&&(
-        <div className="mt-3 pt-3 flex items-center gap-2" style={{ borderTop:"1px solid rgba(26,31,60,.06)" }}>
-          <Star className="w-3.5 h-3.5 text-amber-500" aria-hidden="true" />
-          <span className="text-sm font-bold" style={{ color:"#1A1F3C" }}>{sub.average_score}/40</span>
-        </div>
-      )}
-    </article>
-  );
-}
 
 export default function JudgePanel() {
   const queryClient = useQueryClient();
@@ -81,31 +59,7 @@ export default function JudgePanel() {
 
   return (
     <PageShell>
-      <div className="relative overflow-hidden pt-28 pb-12" style={{ background:"linear-gradient(135deg,#FFF5EF 0%,#FFF0FF 50%,#F0F4FF 100%)" }}>
-        <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-4 mb-5">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
-              style={{ background:"linear-gradient(135deg,#7C4DFF,#A855F7)",boxShadow:"0 8px 28px rgba(124,77,255,.4)" }}>
-              <Gavel className="w-7 h-7 text-white" aria-hidden="true" />
-            </div>
-            <div>
-              <h1 className="font-heading font-extrabold text-3xl sm:text-4xl tracking-tight" style={{ color:"#1A1F3C" }}>Judge Panel</h1>
-              <p className="text-sm font-medium mt-0.5" style={{ color:"rgba(26,31,60,.55)" }}>Review and score hackathon submissions</p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            {[{label:"Total Submissions",val:submitted.length,color:"#7C4DFF"},{label:"Reviewed",val:myScored.length,color:"#10B981"},{label:"Pending",val:myUnscored.length,color:"#F4622A"}].map(({label,val,color})=>(
-              <div key={label} className="flex items-center gap-2 px-4 py-2.5 rounded-2xl"
-                style={{ background:"#fff",border:"1px solid rgba(0,0,0,.07)" }}>
-                <div className="w-2 h-2 rounded-full" style={{ background:color }} />
-                <span className="font-bold text-base" style={{ color:"#1A1F3C" }}>{val}</span>
-                <span className="text-xs" style={{ color:"rgba(26,31,60,.45)" }}>{label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <JudgePanelHero total={submitted.length} reviewed={myScored.length} pending={myUnscored.length} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {selected ? (
@@ -185,53 +139,15 @@ export default function JudgePanel() {
               </div>
             </div>
 
-            {/* Confirm dialog */}
-            {showConfirm&&(
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-                style={{ background:"rgba(0,0,0,.4)",backdropFilter:"blur(4px)" }}
-                role="dialog" aria-modal="true" aria-labelledby="confirm-title">
-                <motion.div initial={{ scale:.9,opacity:0 }} animate={{ scale:1,opacity:1 }}
-                  className="rounded-3xl p-6 max-w-sm w-full"
-                  style={{ background:"#fff",boxShadow:"0 20px 60px rgba(0,0,0,.2)" }}>
-                  <h3 id="confirm-title" className="font-heading font-bold text-lg mb-2" style={{ color:"#1A1F3C" }}>Confirm Score Submission</h3>
-                  <p className="text-sm mb-6" style={{ color:"rgba(26,31,60,.6)" }}>
-                    Submit score of <strong>{total}/40</strong> for <strong>{selected.project_title}</strong>? This cannot be undone.
-                  </p>
-                  <div className="flex gap-3">
-                    <button onClick={()=>setShowConfirm(false)} className="btn-outline flex-1 px-4 py-2.5 text-sm">Cancel</button>
-                    <button onClick={()=>scoreMutation.mutate()} disabled={scoreMutation.isPending}
-                      className="btn-primary flex-1 px-4 py-2.5 text-sm disabled:opacity-60">
-                      {scoreMutation.isPending?"Submitting...":"Confirm"}
-                    </button>
-                  </div>
-                </motion.div>
-              </div>
-            )}
-
-            {showDeck&&selected?.pitch_deck_url&&(
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-                style={{ background:"rgba(0,0,0,.5)",backdropFilter:"blur(4px)" }}
-                role="dialog" aria-modal="true" aria-labelledby="deck-title">
-                <motion.div initial={{ scale:.95,opacity:0 }} animate={{ scale:1,opacity:1 }} className="rounded-3xl overflow-hidden w-full max-w-5xl max-h-[90vh] flex flex-col"
-                  style={{ background:"#fff",boxShadow:"0 20px 60px rgba(0,0,0,.25)" }}>
-                  <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor:"rgba(26,31,60,.08)" }}>
-                    <div>
-                      <h3 id="deck-title" className="font-heading font-bold text-lg" style={{ color:"#1A1F3C" }}>Pitch Deck Viewer</h3>
-                      <p className="text-xs" style={{ color:"rgba(26,31,60,.5)" }}>{selected.project_title}</p>
-                    </div>
-                    <button onClick={()=>setShowDeck(false)} className="btn-outline px-4 py-2 text-sm">Close</button>
-                  </div>
-                  <div className="flex-1 min-h-0 bg-slate-50">
-                    <iframe
-                      title={`${selected.project_title} pitch deck`}
-                      src={selected.pitch_deck_url}
-                      className="w-full h-[70vh]"
-                      loading="lazy"
-                    />
-                  </div>
-                </motion.div>
-              </div>
-            )}
+            <JudgeDialogs
+              selected={selected}
+              total={total}
+              showConfirm={showConfirm}
+              showDeck={showDeck}
+              scoreMutation={scoreMutation}
+              setShowConfirm={setShowConfirm}
+              setShowDeck={setShowDeck}
+            />
           </motion.div>
         ) : (
           <div>
@@ -246,7 +162,7 @@ export default function JudgePanel() {
               ))}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {myUnscored.map((sub: Submission) => <ProjectCard key={sub.id} sub={sub} onClick={setSelected} />)}
+              {myUnscored.map((sub: Submission) => <JudgeProjectCard key={sub.id} sub={sub} onClick={setSelected} />)}
               {myUnscored.length===0&&<p className="col-span-full text-center py-10" style={{ color:"rgba(26,31,60,.4)" }}>All submissions reviewed!</p>}
             </div>
           </div>

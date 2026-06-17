@@ -1,5 +1,4 @@
-﻿import React, { useState } from "react";
-import type { InputHTMLAttributes, ReactNode } from "react";
+import React, { useState } from "react";
 import { api, type ApiError } from "@/lib/mockData";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import PageShell from "@/components/shared/PageShell";
@@ -9,28 +8,10 @@ import { toast } from "sonner";
 import RegistrationSuccess from "@/components/registration/RegistrationSuccess";
 import RegistrationProgress from "@/components/registration/RegistrationProgress";
 import RegistrationHero from "@/components/registration/RegistrationHero";
+import RegistrationStepContent, { type RegistrationErrors, type RegistrationForm } from "@/components/registration/RegistrationStepContent";
 import type { DuplicateRegistrationError } from "@/mocks/types";
 
-type TeamAction = "create" | "join";
 
-type RegistrationForm = {
-  participant_name: string; email: string; organization: string; role_title: string;
-  team_action: TeamAction; team_name: string; invite_code: string; track: string;
-};
-
-type RegistrationErrors = Partial<Record<keyof RegistrationForm, string>>;
-
-const FL = ({ htmlFor, children }: { htmlFor: string; children: ReactNode }) => (
-  <label htmlFor={htmlFor} className="block text-sm font-bold mb-2" style={{ color:"#1A1F3C" }}>{children}</label>
-);
-
-const FI = ({ id, ...props }: InputHTMLAttributes<HTMLInputElement> & { id: string }) => (
-  <input id={id} {...props}
-    className="w-full px-4 py-3 rounded-2xl text-sm font-medium outline-none transition-all"
-    style={{ background:"#F8F7FF",border:"1.5px solid rgba(26,31,60,.14)",color:"#1A1F3C" }}
-    onFocus={e => { e.target.style.borderColor="#F4622A"; e.target.style.boxShadow="0 0 0 3px rgba(244,98,42,.12)"; }}
-    onBlur={e =>  { e.target.style.borderColor="rgba(26,31,60,.14)"; e.target.style.boxShadow="none"; }} />
-);
 
 export default function RegisterHackathon() {
   const [step, setStep] = useState(0);
@@ -95,9 +76,6 @@ export default function RegisterHackathon() {
   const prev   = () => setStep(s => Math.max(s-1,0));
   const submit = () => createReg.mutate({ ...form, hackathon_id: activeHackathon?.id });
 
-  const Err = ({ field }: { field: keyof RegistrationForm }) => errors[field]
-    ? <p className="text-xs font-semibold mt-1.5" style={{ color:"#F43F5E" }} role="alert">{errors[field]}</p>
-    : null;
 
   if (done) {
     return <RegistrationSuccess regId={regId} hackathonTitle={activeHackathon?.title} />;
@@ -117,14 +95,7 @@ export default function RegisterHackathon() {
             <div className="rounded-3xl p-6 sm:p-8"
               style={{ background:"#fff",border:"1px solid rgba(26,31,60,.09)",boxShadow:"0 8px 40px rgba(0,0,0,.07)" }}>
 
-              {step === 0 && (
-                <div className="space-y-5">
-                  <div><FL htmlFor="name">Full Name *</FL><FI id="name" value={form.participant_name} onChange={e=>update("participant_name",e.target.value)} placeholder="John Doe" aria-required="true" /><Err field="participant_name" /></div>
-                  <div><FL htmlFor="email">Email Address *</FL><FI id="email" type="email" value={form.email} onChange={e=>update("email",e.target.value)} placeholder="john@example.com" aria-required="true" /><Err field="email" /></div>
-                  <div><FL htmlFor="org">College / Organization *</FL><FI id="org" value={form.organization} onChange={e=>update("organization",e.target.value)} placeholder="MIT" aria-required="true" /><Err field="organization" /></div>
-                  <div><FL htmlFor="role">Your Role *</FL><FI id="role" value={form.role_title} onChange={e=>update("role_title",e.target.value)} placeholder="Frontend Developer" aria-required="true" /><Err field="role_title" /></div>
-                </div>
-              )}
+              <RegistrationStepContent step={step} form={form} errors={errors} activeHackathon={activeHackathon} update={update} />
 
               {step === 1 && (
                 <div className="space-y-4">
