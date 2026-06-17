@@ -1,12 +1,23 @@
 ﻿import React, { useState, useEffect } from "react";
 
-export default function CountdownTimer({ targetDate, label, compact = false }) {
+type CountdownTimerProps = {
+  targetDate?: string;
+  label?: string;
+  compact?: boolean;
+};
+
+export default function CountdownTimer({ targetDate, label, compact = false }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [expired, setExpired] = useState(false);
 
   useEffect(() => {
     const calc = () => {
-      const diff = new Date(targetDate) - new Date();
+      if (!targetDate) {
+        setExpired(true);
+        return;
+      }
+
+      const diff = new Date(targetDate).getTime() - Date.now();
       if (diff <= 0) { setExpired(true); return; }
       setTimeLeft({
         days:    Math.floor(diff / 86400000),

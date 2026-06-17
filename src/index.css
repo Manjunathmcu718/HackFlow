@@ -27,6 +27,28 @@
     --ring:         16 95% 58%;
     --radius: 1rem;
   }
+
+  [data-theme="dark"] {
+    --background: 220 33% 8%;
+    --foreground: 210 40% 96%;
+    --card: 222 28% 12%;
+    --card-foreground: 210 40% 96%;
+    --popover: 222 28% 12%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 16 95% 58%;
+    --primary-foreground: 0 0% 100%;
+    --accent: 258 85% 62%;
+    --accent-foreground: 0 0% 100%;
+    --secondary: 220 22% 16%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 220 22% 16%;
+    --muted-foreground: 215 16% 68%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 20% 22%;
+    --input: 220 20% 22%;
+    --ring: 16 95% 58%;
+  }
 }
 
 @layer base {
@@ -34,6 +56,9 @@
   html { color-scheme: light; background: #FAF8F5; }
   body { @apply bg-background text-foreground; font-family: 'Plus Jakarta Sans', sans-serif; }
   h1,h2,h3,h4,h5,h6 { font-family: 'Syne', sans-serif; }
+
+  [data-theme="dark"] html { color-scheme: dark; background: #0B1220; }
+  [data-theme="dark"] body { background: hsl(var(--background)); color: hsl(var(--foreground)); }
 }
 
 .text-shimmer {
@@ -104,6 +129,46 @@
   color: #fff !important; box-shadow: 0 4px 14px rgba(244,98,42,.35) !important; border-radius: 10px;
 }
 .organizer-tabs [data-state="inactive"] { color: rgba(26,31,60,.55) !important; background: transparent !important; }
+[data-theme="dark"] .hero-bg {
+  background:
+    radial-gradient(ellipse 70% 60% at 100% 0%, rgba(244,98,42,.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 0% 100%, rgba(124,77,255,.18) 0%, transparent 60%),
+    #0B1220;
+}
+[data-theme="dark"] .grid-bg {
+  background-image: radial-gradient(rgba(244,98,42,.2) 1px, transparent 1px);
+}
+[data-theme="dark"] .card-light {
+  background: rgba(17,24,39,.9);
+  border-color: rgba(148,163,184,.16);
+  box-shadow: 0 1px 4px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.22);
+}
+[data-theme="dark"] .btn-outline {
+  color: #E5E7EB;
+  border-color: rgba(148,163,184,.2);
+  background: rgba(255,255,255,.02);
+}
+[data-theme="dark"] .btn-outline:hover {
+  color: #fff;
+  background: rgba(244,98,42,.14);
+}
+[data-theme="dark"] header {
+  background: rgba(11,18,32,.88) !important;
+  border-bottom-color: rgba(148,163,184,.14) !important;
+}
+[data-theme="dark"] footer {
+  background: linear-gradient(180deg,#0F172A 0%,#111827 100%) !important;
+  border-top-color: rgba(148,163,184,.14) !important;
+}
+[data-theme="dark"] .pill-coral,
+[data-theme="dark"] .pill-violet,
+[data-theme="dark"] .pill-amber,
+[data-theme="dark"] .pill-teal {
+  background: rgba(255,255,255,.06);
+  color: #E5E7EB;
+  border-color: rgba(148,163,184,.2);
+}
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: #FAF8F5; }
 ::-webkit-scrollbar-thumb { background: linear-gradient(180deg,#F4622A,#7C4DFF); border-radius: 99px; }
+[data-theme="dark"] ::-webkit-scrollbar-track { background: #0B1220; }

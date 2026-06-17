@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from "react";
+﻿import React, { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { api } from "@/lib/mockData";
 import { useQuery } from "@tanstack/react-query";
@@ -88,6 +88,7 @@ export default function HackathonList() {
   const [dateTo,   setDateTo]   = useState("");
   const [page,     setPage]     = useState(1);
   const PER_PAGE = 6;
+  const [preferredTrack, setPreferredTrack] = useState(() => window.localStorage.getItem("beetlex-preferred-track") || "");
 
   const { data: hackathons = [], isLoading } = useQuery({
     queryKey: ["hackathons"],
@@ -99,6 +100,13 @@ export default function HackathonList() {
     hackathons.forEach(h => (h.tracks || []).forEach(tr => tr.name && s.add(tr.name)));
     return [...s];
   }, [hackathons]);
+
+  useEffect(() => {
+    if (track !== "all") {
+      setPreferredTrack(track);
+      window.localStorage.setItem("beetlex-preferred-track", track);
+    }
+  }, [track]);
 
   const filtered = useMemo(() => hackathons.filter(h => {
     const q = search.toLowerCase();
@@ -112,6 +120,23 @@ export default function HackathonList() {
   }), [hackathons, search, status, track, dateFrom, dateTo]);
 
   const shown = filtered.slice(0, page * PER_PAGE);
+
+  const recommended = useMemo(() => {
+    const sorted = [...hackathons].sort((a, b) => {
+      const aMatch = preferredTrack && (a.tracks || []).some(tr => tr.name === preferredTrack) ? 2 : 0;
+      const bMatch = preferredTrack && (b.tracks || []).some(tr => tr.name === preferredTrack) ? 2 : 0;
+      const aActive = a.status === "active" ? 1 : 0;
+      const bActive = b.status === "active" ? 1 : 0;
+      const aUpcoming = a.status === "upcoming" ? 1 : 0;
+      const bUpcoming = b.status === "upcoming" ? 1 : 0;
+      const aPopularity = a.participant_count || 0;
+      const bPopularity = b.participant_count || 0;
+
+      return (bMatch - aMatch) || (bActive - aActive) || (bUpcoming - aUpcoming) || (bPopularity - aPopularity);
+    });
+
+    return sorted.slice(0, 2);
+  }, [hackathons, preferredTrack]);
 
   return (
     <PageShell>
@@ -169,6 +194,26 @@ export default function HackathonList() {
           </div>
         </div>
       </div>
+
+      {recommended.length > 0 && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-10">
+          <div className="rounded-3xl p-5 sm:p-6 card-light" style={{ background:"rgba(255,255,255,.92)" }}>
+            <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[.2em] pill-coral px-3 py-1 inline-flex items-center gap-2">
+                  <Zap className="w-3 h-3" aria-hidden="true" /> Recommended for you
+                </p>
+                <p className="text-sm mt-3" style={{ color:"rgba(26,31,60,.55)" }}>
+                  Ranked by your recent track filter, then event status, then participant interest.
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {recommended.map((h, i) => <HackCard key={`rec-${h.id}`} h={h} i={i} />)}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filters + Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-24">

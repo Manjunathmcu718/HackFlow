@@ -2,7 +2,7 @@
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 
-export default function PageShell({ children, hideFooter = false }) {
+export default function PageShell({ children, hideFooter = false }: { children: React.ReactNode; hideFooter?: boolean }) {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />

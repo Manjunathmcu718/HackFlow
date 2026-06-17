@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+﻿import React, { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/lib/mockData";
 import { useQuery } from "@tanstack/react-query";
 import PageShell from "@/components/shared/PageShell";
@@ -7,10 +7,32 @@ import { motion } from "framer-motion";
 
 export default function Leaderboard() {
   const [trackFilter, setTrackFilter] = useState("all");
+  const previousRanksRef = useRef(new Map());
   const { data: hackathons  = [] } = useQuery({ queryKey:["hackathons"],  queryFn:() => api.hackathons.list() });
-  const { data: submissions = [] } = useQuery({ queryKey:["submissions"], queryFn:() => api.submissions.list() });
+  const { data: submissions = [] } = useQuery({
+    queryKey:["submissions"],
+    queryFn:() => api.submissions.list(),
+    refetchInterval: 15000,
+    refetchOnWindowFocus: true,
+  });
 
   const hackathon = hackathons.find(h=>h.status==="active") || hackathons[0];
+
+  const ranked = submissions
+    .filter(s=>s.status==="submitted"&&s.average_score>0)
+    .filter(s=>trackFilter==="all"||s.track===trackFilter)
+    .sort((a,b)=>b.average_score-a.average_score);
+
+  const rankedWithDelta = useMemo(() => ranked.map((submission, index) => {
+    const previousRank = previousRanksRef.current.get(submission.id);
+    const currentRank = index + 1;
+    const delta = previousRank ? previousRank - currentRank : 0;
+    return { submission, currentRank, delta };
+  }), [ranked]);
+
+  useEffect(() => {
+    previousRanksRef.current = new Map(ranked.map((submission, index) => [submission.id, index + 1]));
+  }, [ranked]);
 
   if (!hackathon?.leaderboard_published) return (
     <PageShell>
@@ -23,11 +45,6 @@ export default function Leaderboard() {
       </div>
     </PageShell>
   );
-
-  const ranked = submissions
-    .filter(s=>s.status==="submitted"&&s.average_score>0)
-    .filter(s=>trackFilter==="all"||s.track===trackFilter)
-    .sort((a,b)=>b.average_score-a.average_score);
 
   const tracks = [...new Set(submissions.map(s=>s.track).filter(Boolean))];
 
@@ -95,15 +112,15 @@ export default function Leaderboard() {
 
         {/* Full list */}
         <div className="space-y-3">
-          {ranked.map((s,i)=>{
+          {rankedWithDelta.map(({submission:s,currentRank,delta},i)=>{
             const rankColor = i===0?"#F59E0B":i===1?"#94A3B8":i===2?"#F97316":"rgba(26,31,60,.3)";
             const rankBg    = i===0?"rgba(245,158,11,.1)":i===1?"rgba(148,163,184,.12)":i===2?"rgba(249,115,22,.1)":"rgba(26,31,60,.05)";
             return (
-              <motion.div key={s.id} initial={{ opacity:0,y:10 }} animate={{ opacity:1,y:0 }} transition={{ delay:i*.03 }}>
+              <motion.div key={s.id} layout initial={{ opacity:0,y:10 }} animate={{ opacity:1,y:0 }} transition={{ delay:i*.03 }}>
                 <div className="rounded-2xl p-4 flex items-center gap-4"
                   style={{ background:"#fff",border:i<3?`1.5px solid ${rankColor}40`:"1px solid rgba(26,31,60,.09)",boxShadow:"0 2px 8px rgba(0,0,0,.04)" }}>
                   <span className="w-10 h-10 rounded-xl flex items-center justify-center font-mono font-extrabold text-sm shrink-0"
-                    style={{ background:rankBg,color:rankColor }}>#{i+1}</span>
+                    style={{ background:rankBg,color:rankColor }}>#{currentRank}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-bold text-sm" style={{ color:"#1A1F3C" }}>{s.team_name}</h3>
@@ -112,6 +129,12 @@ export default function Leaderboard() {
                     <p className="text-xs mt-0.5 truncate" style={{ color:"rgba(26,31,60,.5)" }}>{s.project_title}</p>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
+                    <div className="text-right min-w-[48px]">
+                      <p className="text-[10px] font-semibold" style={{ color: delta > 0 ? "#10B981" : delta < 0 ? "#F43F5E" : "rgba(26,31,60,.35)" }}>
+                        {delta > 0 ? `+${delta}` : delta < 0 ? `${delta}` : "—"}
+                      </p>
+                      <p className="text-[10px]" style={{ color:"rgba(26,31,60,.35)" }}>rank</p>
+                    </div>
                     {s.demo_url&&<a href={s.demo_url} target="_blank" rel="noopener noreferrer" aria-label="Live Demo"><ExternalLink className="w-4 h-4" style={{ color:"rgba(26,31,60,.4)" }} /></a>}
                     {s.github_url&&<a href={s.github_url} target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository"><Github className="w-4 h-4" style={{ color:"rgba(26,31,60,.4)" }} /></a>}
                     <div className="text-right">

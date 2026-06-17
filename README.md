@@ -2,6 +2,8 @@
 
 Frontend implementation for the BeetleX hackathon management assignment. The app supports public discovery, registration, participant workflows, project submission, judge scoring, organizer controls, and a public leaderboard.
 
+Current implementation status: the UI flows are complete and navigable, the mock API is now MSW-backed, and the codebase is still JSX-first with `allowJs` outside the typed mock/data layer.
+
 ## Setup
 
 ```bash
@@ -19,17 +21,17 @@ npm run lint
 
 ## Routes
 
-| Route | Purpose |
-| --- | --- |
-| `/` | Public landing page |
-| `/hackathons` | Event listing with search, status, track, date filters, and load more |
-| `/hackathon/:id` | Event details, rules, prizes, countdown, and sticky registration CTA |
-| `/register-hackathon` | Multi-step registration with validation and duplicate-email handling |
-| `/participant` | Team dashboard, announcements, resources, submission status, leaderboard widget |
-| `/submit` | Project submission, draft save, links, video URL, PDF pitch deck upload |
-| `/judge` | Judge queue, project details, rubric scoring, comments, completed reviews |
-| `/organizer` | Stats, registration export, submissions, announcements, leaderboard publishing, judge assignment |
-| `/leaderboard` | Public leaderboard |
+| Route                 | Purpose                                                                                          |
+| --------------------- | ------------------------------------------------------------------------------------------------ |
+| `/`                   | Public landing page                                                                              |
+| `/hackathons`         | Event listing with search, status, track, date filters, and load more                            |
+| `/hackathon/:id`      | Event details, rules, prizes, countdown, and sticky registration CTA                             |
+| `/register-hackathon` | Multi-step registration with validation and duplicate-email handling                             |
+| `/participant`        | Team dashboard, announcements, resources, submission status, leaderboard widget                  |
+| `/submit`             | Project submission, draft save, links, video URL, PDF pitch deck upload                          |
+| `/judge`              | Judge queue, project details, rubric scoring, comments, completed reviews                        |
+| `/organizer`          | Stats, registration export, submissions, announcements, leaderboard publishing, judge assignment |
+| `/leaderboard`        | Public leaderboard                                                                               |
 
 ## Architecture Decisions
 
@@ -41,7 +43,7 @@ npm run lint
 
 ## Mock API
 
-The mock API supports:
+The mock API is served through MSW and supports:
 
 - `api.hackathons.list()`
 - `api.hackathons.get(id)`
@@ -54,11 +56,15 @@ The mock API supports:
 - `api.announcements.list()`
 - `api.announcements.create(data)`
 
-Mutations update in-memory arrays for the current browser session.
+Mutations update in-memory arrays through the service worker, so the UI behaves like it is talking to a real backend during local development and review.
 
 ## TypeScript, Linting, Formatting
 
-The project includes `tsconfig.json` with strict mode and `allowJs` enabled, so the existing JSX code is checked by TypeScript. A full production migration would rename files to `.tsx` and add explicit interfaces for hackathons, submissions, teams, registrations, and announcements.
+The project includes `tsconfig.json` with strict mode and `allowJs` enabled, so the existing JSX code is checked by TypeScript tooling, but it is not a full `.tsx` migration.
+
+The mock API layer and MSW handlers are typed in TypeScript.
+
+A full production migration would rename files to `.tsx` and add explicit interfaces for hackathons, submissions, teams, registrations, and announcements.
 
 ESLint and Prettier are configured for code-quality checks and formatting.
 
@@ -76,10 +82,11 @@ The UI uses semantic page sections, labels on form fields, ARIA labels on icon-o
 ## With More Time
 
 - Convert all route and component files to `.tsx` with explicit domain types.
-- Add MSW handlers around the existing `api` contract for more realistic network mocking.
 - Add Playwright tests for registration, submission, judge scoring, and organizer publishing.
 - Add route-level code splitting and list virtualization for very large organizer tables.
 
 ## Bonus Features
 
-No bonus features are claimed as fully implemented. The app includes animated leaderboard UI, but not a real-time rank-delta transport.
+Implemented bonus feature: dark mode with persisted theme selection.
+
+Not implemented: real-time notifications, AI-powered recommendations, and live leaderboard rank-delta transport.

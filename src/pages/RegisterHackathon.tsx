@@ -50,6 +50,15 @@ export default function RegisterHackathon() {
       setRegId("BX-" + String(data.id).slice(-8).toUpperCase());
       setDone(true);
     },
+    onError: error => {
+      if (error?.status === 409 && error?.data?.code === "DUPLICATE_REGISTRATION") {
+        setRegId("BX-" + String(error.data.registrationId).slice(-8).toUpperCase());
+        setDone(true);
+        return;
+      }
+
+      toast.error("Registration could not be completed. Please try again.");
+    },
   });
 
   const update = (field, value) => {

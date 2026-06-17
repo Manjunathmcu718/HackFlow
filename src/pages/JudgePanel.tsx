@@ -42,6 +42,7 @@ export default function JudgePanel() {
   const queryClient = useQueryClient();
   const [selected, setSelected]       = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showDeck, setShowDeck]       = useState(false);
   const [scores, setScores]           = useState({ innovation:5, technical:5, impact:5, presentation:5 });
   const [comments, setComments]       = useState("");
 
@@ -62,6 +63,7 @@ export default function JudgePanel() {
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey:["submissions"]});
       setSelected(null); setShowConfirm(false);
+      setShowDeck(false);
       setScores({innovation:5,technical:5,impact:5,presentation:5}); setComments("");
       toast.success("Score submitted!");
     },
@@ -121,7 +123,18 @@ export default function JudgePanel() {
                 <div className="space-y-2">
                   {selected.demo_url&&<a href={selected.demo_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-semibold" style={{ color:"#F4622A" }}><ExternalLink className="w-3.5 h-3.5" aria-hidden="true" /> Live Demo</a>}
                   {selected.github_url&&<a href={selected.github_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-semibold" style={{ color:"#F4622A" }}><Github className="w-3.5 h-3.5" aria-hidden="true" /> GitHub</a>}
-                  {selected.pitch_deck_url&&<a href={selected.pitch_deck_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-semibold" style={{ color:"#F4622A" }}><FileText className="w-3.5 h-3.5" aria-hidden="true" /> Pitch Deck</a>}
+                  {selected.pitch_deck_url ? (
+                    <button
+                      type="button"
+                      onClick={()=>setShowDeck(true)}
+                      className="flex items-center gap-2 text-sm font-semibold"
+                      style={{ color:"#F4622A" }}
+                    >
+                      <FileText className="w-3.5 h-3.5" aria-hidden="true" /> View Pitch Deck
+                    </button>
+                  ) : (
+                    <p className="text-sm" style={{ color:"rgba(26,31,60,.45)" }}>No pitch deck uploaded.</p>
+                  )}
                   {selected.video_url&&<a href={selected.video_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-semibold" style={{ color:"#F4622A" }}><Film className="w-3.5 h-3.5" aria-hidden="true" /> Demo Video</a>}
                 </div>
               </div>
@@ -182,6 +195,31 @@ export default function JudgePanel() {
                       className="btn-primary flex-1 px-4 py-2.5 text-sm disabled:opacity-60">
                       {scoreMutation.isPending?"Submitting...":"Confirm"}
                     </button>
+                  </div>
+                </motion.div>
+              </div>
+            )}
+
+            {showDeck&&selected?.pitch_deck_url&&(
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                style={{ background:"rgba(0,0,0,.5)",backdropFilter:"blur(4px)" }}
+                role="dialog" aria-modal="true" aria-labelledby="deck-title">
+                <motion.div initial={{ scale:.95,opacity:0 }} animate={{ scale:1,opacity:1 }} className="rounded-3xl overflow-hidden w-full max-w-5xl max-h-[90vh] flex flex-col"
+                  style={{ background:"#fff",boxShadow:"0 20px 60px rgba(0,0,0,.25)" }}>
+                  <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor:"rgba(26,31,60,.08)" }}>
+                    <div>
+                      <h3 id="deck-title" className="font-heading font-bold text-lg" style={{ color:"#1A1F3C" }}>Pitch Deck Viewer</h3>
+                      <p className="text-xs" style={{ color:"rgba(26,31,60,.5)" }}>{selected.project_title}</p>
+                    </div>
+                    <button onClick={()=>setShowDeck(false)} className="btn-outline px-4 py-2 text-sm">Close</button>
+                  </div>
+                  <div className="flex-1 min-h-0 bg-slate-50">
+                    <iframe
+                      title={`${selected.project_title} pitch deck`}
+                      src={selected.pitch_deck_url}
+                      className="w-full h-[70vh]"
+                      loading="lazy"
+                    />
                   </div>
                 </motion.div>
               </div>

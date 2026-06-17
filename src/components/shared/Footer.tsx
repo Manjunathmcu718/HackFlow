@@ -1,9 +1,12 @@
 ﻿import React from "react";
 import { Link } from "react-router-dom";
 import { Github, Twitter, Linkedin, Mail, ArrowUpRight } from "lucide-react";
-import { motion } from "framer-motion";
 
-const LINKS = {
+type NavLink = { label: string; path: string } | { label: string; href: string };
+
+type LinkGroups = Record<string, NavLink[]>;
+
+const LINKS: LinkGroups = {
   Platform: [
     { label: "Browse Hackathons", path: "/hackathons" },
     { label: "Leaderboard",       path: "/leaderboard" },
@@ -70,10 +73,13 @@ export default function Footer() {
             <div key={section}>
               <h4 className="font-heading font-bold text-sm mb-5 uppercase tracking-wider" style={{ color: "rgba(26,31,60,.5)" }}>{section}</h4>
               <div className="flex flex-col gap-3">
-                {links.map(link => link.path
-                  ? <Link key={link.label} to={link.path} className="text-sm" style={{ color: "rgba(26,31,60,.55)" }}>{link.label}</Link>
-                  : <a key={link.label} href={link.href} className="text-sm" style={{ color: "rgba(26,31,60,.55)" }}>{link.label}</a>
-                )}
+                {links.map(link => (
+                  "path" in link ? (
+                    <Link key={link.label} to={link.path} className="text-sm" style={{ color: "rgba(26,31,60,.55)" }}>{link.label}</Link>
+                  ) : (
+                    <a key={link.label} href={link.href} className="text-sm" style={{ color: "rgba(26,31,60,.55)" }}>{link.label}</a>
+                  )
+                ))}
               </div>
             </div>
           ))}
