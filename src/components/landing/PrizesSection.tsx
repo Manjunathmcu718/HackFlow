@@ -1,6 +1,7 @@
 ﻿import React from "react";
 import { motion } from "framer-motion";
 import { Trophy, Award, Heart, Star, Cpu, Globe, Gamepad2, Wrench } from "lucide-react";
+import type { Hackathon } from "@/mocks/types";
 
 const DEFAULT_PRIZES = [
   { place: "Grand Prize",       amount: "$10,000", description: "Best overall project", icon: Trophy, bg: "linear-gradient(135deg,#F4622A,#FB923C,#FDE68A)", tag: "#F4622A", label: "Top Prize" },
@@ -10,10 +11,11 @@ const DEFAULT_PRIZES = [
 ];
 const TRACK_ICONS = [Cpu, Globe, Gamepad2, Wrench];
 
-export default function PrizesSection({ hackathon }) {
-  const prizes = hackathon?.prizes?.length > 0
-    ? hackathon.prizes.map((p, i) => ({ ...DEFAULT_PRIZES[i % DEFAULT_PRIZES.length], ...p }))
+export default function PrizesSection({ hackathon }: { hackathon?: Hackathon }) {
+  const prizes = hackathon?.prizes && hackathon.prizes.length > 0
+    ? hackathon.prizes.map((p, i: number) => ({ ...DEFAULT_PRIZES[i % DEFAULT_PRIZES.length], ...p }))
     : DEFAULT_PRIZES;
+  const tracks = hackathon?.tracks ?? [];
 
   return (
     <section className="relative py-24 sm:py-32 overflow-hidden" style={{ background: "#FAF8F5" }}>
@@ -39,7 +41,7 @@ export default function PrizesSection({ hackathon }) {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
-          {prizes.map((p, i) => (
+          {prizes.map((p, i: number) => (
             <motion.div key={p.place}
               initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
@@ -66,11 +68,11 @@ export default function PrizesSection({ hackathon }) {
           ))}
         </div>
 
-        {hackathon?.tracks?.length > 0 && (
+        {tracks.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <h3 className="font-heading text-2xl font-bold text-center mb-8" style={{ color: "#1A1F3C" }}>Technology Tracks</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {hackathon.tracks.map((t, i) => {
+              {tracks.map((t, i: number) => {
                 const TIcon = TRACK_ICONS[i % TRACK_ICONS.length];
                 return (
                   <motion.div key={t.name} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}

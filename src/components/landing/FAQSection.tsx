@@ -2,6 +2,15 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus } from "lucide-react";
 
+type FAQItem = {
+  question: string;
+  answer: string;
+};
+
+type FAQSectionProps = {
+  faqs?: FAQItem[];
+};
+
 const DEFAULT = [
   { question: "Do I need Web3 experience?",    answer: "Not at all! We welcome developers of all backgrounds. Workshops and mentors are available." },
   { question: "Can I participate solo?",        answer: "Yes! Solo participation is fully supported. Teams can be 1 to 4 members." },
@@ -10,9 +19,9 @@ const DEFAULT = [
   { question: "What do I need to submit?",      answer: "A working demo, GitHub repository, and a short pitch. Bonus points for a video walkthrough." },
 ];
 
-export default function FAQSection({ faqs }) {
-  const items = faqs?.length > 0 ? faqs : DEFAULT;
-  const [openIdx, setOpenIdx] = useState(null);
+export default function FAQSection({ faqs }: FAQSectionProps) {
+  const items: FAQItem[] = faqs && faqs.length > 0 ? faqs : DEFAULT;
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   return (
     <section className="relative py-24 sm:py-32 overflow-hidden" style={{ background: "#fff" }}>
@@ -32,7 +41,7 @@ export default function FAQSection({ faqs }) {
           </motion.h2>
         </div>
         <div className="space-y-3">
-          {items.map((faq, i) => {
+          {items.map((faq: FAQItem, i: number) => {
             const isOpen = openIdx === i;
             return (
               <motion.div key={i}

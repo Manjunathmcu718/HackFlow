@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo, useEffect } from "react";
+﻿import React, { useState, useMemo, useEffect, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { api } from "@/lib/mockData";
 import { useQuery } from "@tanstack/react-query";
@@ -7,8 +7,9 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { Search, Calendar, Users, ArrowRight, Layers, Trophy, Zap } from "lucide-react";
+import type { Hackathon } from "@/mocks/types";
 
-function Orb({ style }) {
+function Orb({ style }: { style: CSSProperties & { dur?: number; del?: number } }) {
   return (
     <motion.div className="absolute rounded-full pointer-events-none" style={style}
       animate={{ y: [0,-30,0], x: [0,15,0], scale: [1,1.08,1] }}
@@ -25,7 +26,7 @@ const THEMES = [
   { banner:"linear-gradient(135deg,#F59E0B,#F97316,#F4622A)", accent:"#F59E0B", chip:"rgba(245,158,11,.12)", chipText:"#D97706" },
 ];
 
-function HackCard({ h, i }) {
+function HackCard({ h, i }: { h: Hackathon; i: number }) {
   const t = THEMES[i % THEMES.length];
   return (
     <motion.div initial={{ opacity:0, y:40 }} animate={{ opacity:1, y:0 }}
@@ -90,14 +91,14 @@ export default function HackathonList() {
   const PER_PAGE = 6;
   const [preferredTrack, setPreferredTrack] = useState(() => window.localStorage.getItem("beetlex-preferred-track") || "");
 
-  const { data: hackathons = [], isLoading } = useQuery({
+  const { data: hackathons = [], isLoading } = useQuery<Hackathon[]>({
     queryKey: ["hackathons"],
-    queryFn: () => api.hackathons.list(),
+    queryFn: () => api.hackathons.list() as Promise<Hackathon[]>,
   });
 
   const allTracks = useMemo(() => {
-    const s = new Set();
-    hackathons.forEach(h => (h.tracks || []).forEach(tr => tr.name && s.add(tr.name)));
+    const s = new Set<string>();
+    hackathons.forEach((h: Hackathon) => (h.tracks || []).forEach(tr => tr.name && s.add(tr.name)));
     return [...s];
   }, [hackathons]);
 
@@ -264,7 +265,7 @@ export default function HackathonList() {
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {shown.map((h, i) => <HackCard key={h.id} h={h} i={i} />)}
+              {shown.map((h: Hackathon, i: number) => <HackCard key={h.id} h={h} i={i} />)}
             </div>
             {shown.length < filtered.length && (
               <div className="flex justify-center mt-12">

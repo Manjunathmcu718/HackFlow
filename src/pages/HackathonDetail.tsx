@@ -8,14 +8,15 @@ import CountdownTimer from "@/components/shared/CountdownTimer";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { Users, Trophy, Clock, Code2, ArrowRight, BookOpen, Shield, Plus, Minus, Loader2 } from "lucide-react";
+import type { Hackathon } from "@/mocks/types";
 
 export default function HackathonDetail() {
-  const { id }    = useParams();
-  const [openFaq, setOpenFaq] = useState(null);
+  const { id } = useParams();
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const { data: hackathon, isLoading } = useQuery({
+  const { data: hackathon, isLoading } = useQuery<Hackathon>({
     queryKey: ["hackathon", id],
-    queryFn:  () => api.hackathons.get(id),
+    queryFn: () => api.hackathons.get(id as string) as Promise<Hackathon>,
   });
 
   if (isLoading) return (

@@ -1,7 +1,8 @@
 ﻿import React from "react";
 import { motion } from "framer-motion";
+import type { Sponsor } from "@/mocks/types";
 
-const DEFAULT = [
+const DEFAULT: Sponsor[] = [
   { name: "Ethereum Foundation", tier: "platinum" },
   { name: "Polygon",             tier: "gold" },
   { name: "Chainlink",           tier: "gold" },
@@ -11,11 +12,11 @@ const DEFAULT = [
 ];
 const DOTS = ["#F4622A","#7C4DFF","#06B6D4","#10B981","#F59E0B","#EC4899"];
 
-export default function SponsorsSection({ sponsors }) {
-  const all      = sponsors?.length > 0 ? sponsors : DEFAULT;
-  const platinum = all.filter(s => s.tier === "platinum");
-  const gold     = all.filter(s => s.tier === "gold");
-  const ticker   = [...all, ...all, ...all];
+export default function SponsorsSection({ sponsors }: { sponsors?: Sponsor[] }) {
+  const all: Sponsor[] = sponsors && sponsors.length > 0 ? sponsors : DEFAULT;
+  const platinum = all.filter((s: Sponsor) => s.tier === "platinum");
+  const gold = all.filter((s: Sponsor) => s.tier === "gold");
+  const ticker = [...all, ...all, ...all];
 
   return (
     <section className="relative py-20 sm:py-28 overflow-hidden" style={{ background: "#fff" }}>
@@ -38,7 +39,7 @@ export default function SponsorsSection({ sponsors }) {
           <div className="mb-10">
             <p className="text-center text-[10px] text-muted-foreground font-mono uppercase tracking-[.2em] mb-5">Platinum Partners</p>
             <div className="flex flex-wrap justify-center gap-4">
-              {platinum.map(s => (
+              {platinum.map((s: Sponsor) => (
                 <motion.div key={s.name} whileHover={{ scale: 1.05 }}
                   className="px-8 py-4 rounded-2xl font-heading font-bold text-lg cursor-default"
                   style={{ background: "linear-gradient(135deg,rgba(245,158,11,.08),rgba(249,115,22,.04))", border: "1.5px solid rgba(245,158,11,.25)", color: "#D97706" }}>
@@ -53,7 +54,7 @@ export default function SponsorsSection({ sponsors }) {
           <div className="mb-10">
             <p className="text-center text-[10px] text-muted-foreground font-mono uppercase tracking-[.2em] mb-5">Gold Partners</p>
             <div className="flex flex-wrap justify-center gap-3">
-              {gold.map(s => (
+              {gold.map((s: Sponsor) => (
                 <motion.div key={s.name} whileHover={{ scale: 1.04 }}
                   className="card-light px-6 py-3 rounded-xl font-semibold text-base cursor-default" style={{ color: "#1A1F3C" }}>
                   {s.name}

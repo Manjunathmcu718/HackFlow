@@ -4,10 +4,10 @@ import { ArrowRight, Zap, Star, CheckCircle2 } from "lucide-react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import CountdownTimer from "../shared/CountdownTimer";
 
-function useCountUp(target, duration = 1800) {
+function useCountUp(target: string | number, duration = 1800) {
   const [count, setCount] = useState(0);
   const [started, setStarted] = useState(false);
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
@@ -20,9 +20,9 @@ function useCountUp(target, duration = 1800) {
   useEffect(() => {
     if (!started) return;
     const num = parseFloat(String(target).replace(/[^0-9.]/g, ""));
-    if (isNaN(num)) { setCount(target); return; }
-    let start = null;
-    const step = (ts) => {
+    if (isNaN(num)) { setCount(0); return; }
+    let start: number | null = null;
+    const step = (ts: number) => {
       if (!start) start = ts;
       const p = Math.min((ts - start) / duration, 1);
       setCount(Math.floor((1 - Math.pow(1 - p, 3)) * num));
@@ -35,13 +35,13 @@ function useCountUp(target, duration = 1800) {
   return { count, ref };
 }
 
-function StatCard({ val, label, color, delay }) {
+function StatCard({ val, label, color, delay }: { val: string | number; label: string; color: string; delay: number }) {
   const suffix = String(val).replace(/[0-9.,]/g, "");
   const { count, ref } = useCountUp(val);
   const num = parseFloat(String(val).replace(/[^0-9.]/g, ""));
   const display = isNaN(num) ? val : `${count.toLocaleString()}${suffix}`;
   return (
-    <motion.div ref__={ref}
+    <motion.div ref={ref}
       initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay }}
       className="card-light rounded-2xl p-5 flex flex-col gap-2 cursor-default">
       <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-1"
@@ -55,13 +55,13 @@ function StatCard({ val, label, color, delay }) {
   );
 }
 
-function MagBtn({ children }) {
-  const ref = useRef(null);
+function MagBtn({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement | null>(null);
   const x = useMotionValue(0), y = useMotionValue(0);
   const sx = useSpring(x, { stiffness: 250, damping: 22 });
   const sy = useSpring(y, { stiffness: 250, damping: 22 });
   return (
-    <motion.div ref__={ref} style={{ x: sx, y: sy }}
+    <motion.div ref={ref} style={{ x: sx, y: sy }}
       onMouseMove={e => {
         const r = ref.current?.getBoundingClientRect();
         if (!r) return;
@@ -82,7 +82,15 @@ const STATS    = [
   { val: "14",     label: "Days",      color: "#10B981" },
 ];
 
-export default function HeroSection({ hackathon }) {
+type HeroSectionProps = {
+  hackathon?: {
+    participant_count?: number;
+    tagline?: string;
+    submission_deadline?: string;
+  };
+};
+
+export default function HeroSection({ hackathon }: HeroSectionProps) {
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden hero-bg">
       <div className="absolute inset-0 grid-bg opacity-60 pointer-events-none" />

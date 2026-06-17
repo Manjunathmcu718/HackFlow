@@ -6,15 +6,20 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import { Gavel, ExternalLink, Github, FileText, Film, Star, Check, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import type { Submission } from "@/mocks/types";
 
 const RUBRIC = [
   { key:"innovation",   label:"Innovation",          desc:"Originality and creative approach" },
   { key:"technical",    label:"Technical Execution", desc:"Code quality, architecture, and engineering" },
   { key:"impact",       label:"Impact",              desc:"Real-world applicability and potential" },
   { key:"presentation", label:"Presentation",        desc:"Clarity, UX, and communication" },
-];
+] as const;
 
-function ProjectCard({ sub, onClick }) {
+type RubricKey = typeof RUBRIC[number]["key"];
+
+type ScoreMap = Record<RubricKey, number>;
+
+function ProjectCard({ sub, onClick }: { sub: Submission; onClick: (submission: Submission) => void }) {
   return (
     <article onClick={() => onClick(sub)} className="card-light p-5 rounded-2xl cursor-pointer">
       <div className="flex items-start justify-between mb-2">
@@ -40,21 +45,24 @@ function ProjectCard({ sub, onClick }) {
 
 export default function JudgePanel() {
   const queryClient = useQueryClient();
-  const [selected, setSelected]       = useState(null);
+  const [selected, setSelected]       = useState<Submission | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showDeck, setShowDeck]       = useState(false);
-  const [scores, setScores]           = useState({ innovation:5, technical:5, impact:5, presentation:5 });
+  const [scores, setScores]           = useState<ScoreMap>({ innovation:5, technical:5, impact:5, presentation:5 });
   const [comments, setComments]       = useState("");
 
-  const { data: submissions = [] } = useQuery({ queryKey:["submissions"], queryFn:() => api.submissions.list() });
+  const { data: submissions = [] } = useQuery<Submission[]>({ queryKey:["submissions"], queryFn:() => api.submissions.list() as Promise<Submission[]> });
 
-  const submitted  = submissions.filter(s=>s.status==="submitted");
-  const myScored   = submitted.filter(s=>s.scores?.length>0);
-  const myUnscored = submitted.filter(s=>!s.scores?.length);
+  const submitted  = submissions.filter((s: Submission) => s.status==="submitted");
+  const myScored   = submitted.filter((s: Submission) => s.scores?.length>0);
+  const myUnscored = submitted.filter((s: Submission) => !s.scores?.length);
   const total      = Object.values(scores).reduce((a,b)=>a+b,0);
 
   const scoreMutation = useMutation({
     mutationFn: async () => {
+      if (!selected) {
+        return;
+      }
       const newScore = { judge_name:"Current Judge",...scores,total,comments };
       const allScores = [...(selected.scores||[]),newScore];
       const avg = Math.round(allScores.reduce((s,sc)=>s+sc.total,0)/allScores.length);
@@ -69,7 +77,7 @@ export default function JudgePanel() {
     },
   });
 
-  const iStyle = { background:"#F8F7FF",border:"1.5px solid rgba(26,31,60,.14)",borderRadius:12,padding:"10px 14px",color:"#1A1F3C",fontSize:14,outline:"none",width:"100%",minHeight:80,resize:"vertical" };
+  const iStyle = { background:"#F8F7FF",border:"1.5px solid rgba(26,31,60,.14)",borderRadius:12,padding:"10px 14px",color:"#1A1F3C",fontSize:14,outline:"none",width:"100%",minHeight:80,resize:"vertical" as const };
 
   return (
     <PageShell>
@@ -118,7 +126,7 @@ export default function JudgePanel() {
                 <p className="text-sm mb-4" style={{ color:"rgba(26,31,60,.5)" }}>by {selected.team_name}</p>
                 <p className="text-sm leading-relaxed mb-4" style={{ color:"rgba(26,31,60,.7)" }}>{selected.description}</p>
                 <div className="flex flex-wrap gap-1.5 mb-4">
-                  {(selected.tech_stack||[]).map(t=><span key={t} className="text-xs font-semibold px-2.5 py-1 rounded-full pill-violet">{t}</span>)}
+                  {(selected.tech_stack||[]).map((t: string) => <span key={t} className="text-xs font-semibold px-2.5 py-1 rounded-full pill-violet">{t}</span>)}
                 </div>
                 <div className="space-y-2">
                   {selected.demo_url&&<a href={selected.demo_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-semibold" style={{ color:"#F4622A" }}><ExternalLink className="w-3.5 h-3.5" aria-hidden="true" /> Live Demo</a>}
@@ -238,7 +246,7 @@ export default function JudgePanel() {
               ))}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {myUnscored.map(sub=><ProjectCard key={sub.id} sub={sub} onClick={setSelected} />)}
+              {myUnscored.map((sub: Submission) => <ProjectCard key={sub.id} sub={sub} onClick={setSelected} />)}
               {myUnscored.length===0&&<p className="col-span-full text-center py-10" style={{ color:"rgba(26,31,60,.4)" }}>All submissions reviewed!</p>}
             </div>
           </div>

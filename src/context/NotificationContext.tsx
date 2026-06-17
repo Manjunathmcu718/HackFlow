@@ -2,6 +2,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/mockData";
+import type { Announcement } from "@/mocks/types";
 
 type Priority = "info" | "warning" | "urgent";
 
@@ -91,7 +92,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }, []);
 
   const refresh = useCallback(async () => {
-    const announcements = await api.announcements.list();
+    const announcements = await api.announcements.list() as Announcement[];
     mergeAnnouncements(announcements);
     hydratedRef.current = true;
   }, [mergeAnnouncements]);
@@ -142,7 +143,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   const unreadCount = useMemo(() => notifications.filter(notification => !notification.read).length, [notifications]);
 
-  const value = useMemo(() => ({
+  const value = useMemo<NotificationContextValue>(() => ({
     notifications,
     unreadCount,
     refresh,

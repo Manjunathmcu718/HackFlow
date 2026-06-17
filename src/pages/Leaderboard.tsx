@@ -4,26 +4,27 @@ import { useQuery } from "@tanstack/react-query";
 import PageShell from "@/components/shared/PageShell";
 import { Trophy, Medal, Star, ExternalLink, Github, Lock } from "lucide-react";
 import { motion } from "framer-motion";
+import type { Hackathon, Submission } from "@/mocks/types";
 
 export default function Leaderboard() {
   const [trackFilter, setTrackFilter] = useState("all");
-  const previousRanksRef = useRef(new Map());
-  const { data: hackathons  = [] } = useQuery({ queryKey:["hackathons"],  queryFn:() => api.hackathons.list() });
-  const { data: submissions = [] } = useQuery({
+  const previousRanksRef = useRef<Map<string, number>>(new Map());
+  const { data: hackathons = [] } = useQuery<Hackathon[]>({ queryKey:["hackathons"], queryFn:() => api.hackathons.list() as Promise<Hackathon[]> });
+  const { data: submissions = [] } = useQuery<Submission[]>({
     queryKey:["submissions"],
-    queryFn:() => api.submissions.list(),
+    queryFn:() => api.submissions.list() as Promise<Submission[]>,
     refetchInterval: 15000,
     refetchOnWindowFocus: true,
   });
 
-  const hackathon = hackathons.find(h=>h.status==="active") || hackathons[0];
+  const hackathon = hackathons.find((h: Hackathon) => h.status==="active") || hackathons[0];
 
   const ranked = submissions
-    .filter(s=>s.status==="submitted"&&s.average_score>0)
-    .filter(s=>trackFilter==="all"||s.track===trackFilter)
-    .sort((a,b)=>b.average_score-a.average_score);
+    .filter((s: Submission) => s.status==="submitted"&&s.average_score>0)
+    .filter((s: Submission) => trackFilter==="all"||s.track===trackFilter)
+    .sort((a: Submission, b: Submission)=>b.average_score-a.average_score);
 
-  const rankedWithDelta = useMemo(() => ranked.map((submission, index) => {
+  const rankedWithDelta = useMemo(() => ranked.map((submission: Submission, index: number) => {
     const previousRank = previousRanksRef.current.get(submission.id);
     const currentRank = index + 1;
     const delta = previousRank ? previousRank - currentRank : 0;
@@ -31,7 +32,7 @@ export default function Leaderboard() {
   }), [ranked]);
 
   useEffect(() => {
-    previousRanksRef.current = new Map(ranked.map((submission, index) => [submission.id, index + 1]));
+    previousRanksRef.current = new Map(ranked.map((submission: Submission, index: number) => [submission.id, index + 1]));
   }, [ranked]);
 
   if (!hackathon?.leaderboard_published) return (
@@ -46,7 +47,7 @@ export default function Leaderboard() {
     </PageShell>
   );
 
-  const tracks = [...new Set(submissions.map(s=>s.track).filter(Boolean))];
+  const tracks = [...new Set(submissions.map((s: Submission) => s.track).filter(Boolean))] as string[];
 
   const PODIUM = [
     { accent:"#F59E0B", bg:"rgba(245,158,11,.1)", border:"rgba(245,158,11,.35)", icon:Trophy },
@@ -80,7 +81,7 @@ export default function Leaderboard() {
             style={{ background:"#fff",border:"1.5px solid rgba(244,98,42,.3)",color:"#1A1F3C",boxShadow:"0 2px 8px rgba(0,0,0,.06)" }}
             aria-label="Filter by track">
             <option value="all">All Tracks</option>
-            {tracks.map(t=><option key={t} value={t}>{t}</option>)}
+            {tracks.map((t: string)=><option key={t} value={t}>{t}</option>)}
           </select>
         </div>
 

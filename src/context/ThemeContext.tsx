@@ -12,7 +12,7 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-function getInitialTheme() {
+function getInitialTheme(): "light" | "dark" {
   if (typeof window === "undefined") {
     return "light";
   }
@@ -26,7 +26,7 @@ function getInitialTheme() {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState(getInitialTheme);
+  const [theme, setTheme] = useState<"light" | "dark">(getInitialTheme);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -35,7 +35,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     window.localStorage.setItem(THEME_STORAGE_KEY, theme);
   }, [theme]);
 
-  const value = useMemo(() => ({
+  const value = useMemo<ThemeContextValue>(() => ({
     theme,
     isDark: theme === "dark",
     setTheme,

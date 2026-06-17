@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+﻿import React, { useState, type CSSProperties } from "react";
 import { api } from "@/lib/mockData";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import PageShell from "@/components/shared/PageShell";
@@ -7,12 +7,18 @@ import { Users, FileText, Gavel, Trophy, Megaphone, Send, Search, Download, Eye,
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
+import type { AnnouncementPriority, Hackathon, Registration, Submission } from "@/mocks/types";
 
 // Judge assignment sub-component.
-function JudgeAssignmentTab({ hackathon, submissions }) {
+type JudgeAssignmentTabProps = {
+  hackathon?: Hackathon;
+  submissions: Submission[];
+};
+
+function JudgeAssignmentTab({ hackathon, submissions }: JudgeAssignmentTabProps) {
   const [showForm, setShowForm] = useState(false);
-  const [assignments, setAssignments] = useState({});
-  const [af, setAf] = useState({ track:"", name:"", email:"" });
+  const [assignments, setAssignments] = useState<Record<string, { name: string; email: string }[]>>({});
+  const [af, setAf] = useState({ track: "", name: "", email: "" });
 
   const assign = () => {
     if (!af.track||!af.name.trim()) { toast.error("Track and name required"); return; }
@@ -22,8 +28,8 @@ function JudgeAssignmentTab({ hackathon, submissions }) {
     toast.success("Judge assigned!");
   };
 
-  const thS = { padding:"10px 14px",textAlign:"left",fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:".05em",color:"rgba(26,31,60,.5)",borderBottom:"1px solid rgba(26,31,60,.08)",background:"rgba(26,31,60,.02)" };
-  const tdS = { padding:"12px 14px",fontSize:13,borderBottom:"1px solid rgba(26,31,60,.05)" };
+  const thS: CSSProperties = { padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".05em", color: "rgba(26,31,60,.5)", borderBottom: "1px solid rgba(26,31,60,.08)", background: "rgba(26,31,60,.02)" };
+  const tdS: CSSProperties = { padding: "12px 14px", fontSize: 13, borderBottom: "1px solid rgba(26,31,60,.05)" };
 
   return (
     <div>
@@ -136,51 +142,51 @@ function JudgeAssignmentTab({ hackathon, submissions }) {
 // Main dashboard.
 export default function OrganizerDashboard() {
   const queryClient = useQueryClient();
-  const [searchReg, setSearchReg]             = useState("");
-  const [searchSub, setSearchSub]             = useState("");
-  const [showAnnounce, setShowAnnounce]       = useState(false);
-  const [announcement, setAnnouncement]       = useState({ title:"", message:"", priority:"info" });
-  const [leaderboardPublished, setPublished]  = useState(true);
-  const [activeTab, setActiveTab]             = useState("registrations");
+  const [searchReg, setSearchReg] = useState("");
+  const [searchSub, setSearchSub] = useState("");
+  const [showAnnounce, setShowAnnounce] = useState(false);
+  const [announcement, setAnnouncement] = useState<{ title: string; message: string; priority: AnnouncementPriority }>({ title: "", message: "", priority: "info" });
+  const [leaderboardPublished, setPublished] = useState(true);
+  const [activeTab, setActiveTab] = useState("registrations");
 
-  const { data: hackathons    = [] } = useQuery({ queryKey:["hackathons"],    queryFn:() => api.hackathons.list() });
-  const { data: registrations = [] } = useQuery({ queryKey:["registrations"], queryFn:() => api.registrations.list() });
-  const { data: teams         = [] } = useQuery({ queryKey:["teams"],         queryFn:() => api.teams.list() });
-  const { data: submissions   = [] } = useQuery({ queryKey:["submissions"],   queryFn:() => api.submissions.list() });
-  const { data: announcements = [] } = useQuery({ queryKey:["announcements"], queryFn:() => api.announcements.list() });
+  const { data: hackathons = [] } = useQuery<Hackathon[]>({ queryKey: ["hackathons"], queryFn: () => api.hackathons.list() as Promise<Hackathon[]> });
+  const { data: registrations = [] } = useQuery<Registration[]>({ queryKey: ["registrations"], queryFn: () => api.registrations.list() as Promise<Registration[]> });
+  const { data: teams = [] } = useQuery<{ id: string }[]>({ queryKey: ["teams"], queryFn: () => api.teams.list() as Promise<{ id: string }[]> });
+  const { data: submissions = [] } = useQuery<Submission[]>({ queryKey: ["submissions"], queryFn: () => api.submissions.list() as Promise<Submission[]> });
+  const { data: announcements = [] } = useQuery({ queryKey: ["announcements"], queryFn: () => api.announcements.list() as Promise<import("@/mocks/types").Announcement[]> });
 
   const hackathon = hackathons.find(h=>h.status==="active") || hackathons[0];
 
   const announceMutation = useMutation({
-    mutationFn: data => api.announcements.create({...data,hackathon_id:hackathon?.id,author:"Organizer"}),
+    mutationFn: (data: { title: string; message: string; priority: AnnouncementPriority }) => api.announcements.create({ ...data, hackathon_id: hackathon?.id, author: "Organizer" }),
     onSuccess: () => {
-      queryClient.invalidateQueries({queryKey:["announcements"]});
-      setShowAnnounce(false); setAnnouncement({title:"",message:"",priority:"info"});
+      queryClient.invalidateQueries({ queryKey: ["announcements"] });
+      setShowAnnounce(false); setAnnouncement({ title: "", message: "", priority: "info" });
       toast.success("Announcement sent!");
     },
   });
 
-  const filteredRegs = registrations.filter(r=>r.participant_name?.toLowerCase().includes(searchReg.toLowerCase())||r.email?.toLowerCase().includes(searchReg.toLowerCase()));
-  const filteredSubs = submissions.filter(s=>s.project_title?.toLowerCase().includes(searchSub.toLowerCase())||s.team_name?.toLowerCase().includes(searchSub.toLowerCase()));
-  const judgesActive = [...new Set(submissions.flatMap(s=>(s.scores||[]).map(sc=>sc.judge_name)))].length;
+  const filteredRegs = registrations.filter((r: Registration) => r.participant_name?.toLowerCase().includes(searchReg.toLowerCase()) || r.email?.toLowerCase().includes(searchReg.toLowerCase()));
+  const filteredSubs = submissions.filter((s: Submission) => s.project_title?.toLowerCase().includes(searchSub.toLowerCase()) || s.team_name?.toLowerCase().includes(searchSub.toLowerCase()));
+  const judgesActive = [...new Set(submissions.flatMap((s: Submission) => (s.scores || []).map(sc => sc.judge_name)))].length;
 
   const STATS = [
     { label:"Registrations", value:registrations.length,                                    icon:Users,    color:"#3B82F6", bg:"rgba(59,130,246,.1)" },
     { label:"Teams",         value:teams.length,                                             icon:Users,    color:"#10B981", bg:"rgba(16,185,129,.1)" },
-    { label:"Submissions",   value:submissions.filter(s=>s.status==="submitted").length,     icon:FileText, color:"#F59E0B", bg:"rgba(245,158,11,.1)" },
+    { label:"Submissions",   value:submissions.filter((s: Submission) => s.status==="submitted").length,     icon:FileText, color:"#F59E0B", bg:"rgba(245,158,11,.1)" },
     { label:"Judges Active", value:judgesActive,                                             icon:Gavel,    color:"#7C4DFF", bg:"rgba(124,77,255,.1)" },
   ];
 
   const exportCSV = () => {
     const headers = "Name,Email,Organization,Role,Team,Track,Status\n";
-    const rows = registrations.map(r=>`"${r.participant_name}","${r.email}","${r.organization}","${r.role_title}","${r.team_name||""}","${r.track}","${r.status}"`).join("\n");
+    const rows = registrations.map((r: Registration) => `"${r.participant_name}","${r.email}","${r.organization}","${r.role_title}","${r.team_name||""}","${r.track}","${r.status}"`).join("\n");
     const url  = URL.createObjectURL(new Blob([headers+rows],{type:"text/csv"}));
     Object.assign(document.createElement("a"),{href:url,download:"registrations.csv"}).click();
     toast.success("CSV exported!");
   };
 
-  const thS = { padding:"10px 14px",textAlign:"left",fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:".05em",color:"rgba(26,31,60,.5)",borderBottom:"1px solid rgba(26,31,60,.08)",background:"rgba(26,31,60,.02)" };
-  const tdS = { padding:"12px 14px",fontSize:13,borderBottom:"1px solid rgba(26,31,60,.05)" };
+  const thS: CSSProperties = { padding: "10px 14px", textAlign: "left", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".05em", color: "rgba(26,31,60,.5)", borderBottom: "1px solid rgba(26,31,60,.08)", background: "rgba(26,31,60,.02)" };
+  const tdS: CSSProperties = { padding: "12px 14px", fontSize: 13, borderBottom: "1px solid rgba(26,31,60,.05)" };
 
   const TABS = ["registrations","submissions","leaderboard","announcements","judges"];
 
@@ -210,7 +216,7 @@ export default function OrganizerDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8" role="list" aria-label="Dashboard stats">
-          {STATS.map(s=>(
+          {STATS.map((s) => (
             <div key={s.label} className="card-light rounded-2xl p-5" role="listitem">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background:s.bg }}>
@@ -263,7 +269,7 @@ export default function OrganizerDashboard() {
               <table className="w-full">
                 <thead><tr><th style={thS}>Name</th><th style={thS}>Email</th><th style={thS}>Organization</th><th style={thS}>Track</th><th style={thS}>Status</th></tr></thead>
                 <tbody>
-                  {filteredRegs.map(r=>(
+                  {filteredRegs.map((r) => (
                     <tr key={r.id}>
                       <td style={{...tdS,fontWeight:600,color:"#1A1F3C"}}>{r.participant_name}</td>
                       <td style={{...tdS,color:"rgba(26,31,60,.6)"}}>{r.email}</td>
@@ -296,7 +302,7 @@ export default function OrganizerDashboard() {
               <table className="w-full">
                 <thead><tr><th style={thS}>Project</th><th style={thS}>Team</th><th style={thS}>Track</th><th style={thS}>Status</th><th style={thS}>Score</th></tr></thead>
                 <tbody>
-                  {filteredSubs.map(s=>(
+                  {filteredSubs.map((s) => (
                     <tr key={s.id}>
                       <td style={{...tdS,fontWeight:600,color:"#1A1F3C"}}>{s.project_title}</td>
                       <td style={{...tdS,color:"rgba(26,31,60,.7)"}}>{s.team_name}</td>
@@ -326,9 +332,9 @@ export default function OrganizerDashboard() {
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead><tr><th style={{...thS,width:48}}>#</th><th style={thS}>Team</th><th style={thS}>Project</th><th style={thS}>Track</th><th style={thS}>Avg Score</th><th style={thS}>Reviews</th></tr></thead>
+                <thead><tr><th style={{ ...thS, width: 48 }}>#</th><th style={thS}>Team</th><th style={thS}>Project</th><th style={thS}>Track</th><th style={thS}>Avg Score</th><th style={thS}>Reviews</th></tr></thead>
                 <tbody>
-                  {submissions.filter(s=>s.status==="submitted").sort((a,b)=>(b.average_score||0)-(a.average_score||0)).map((s,i)=>(
+                  {submissions.filter((s) => s.status === "submitted").sort((a, b) => (b.average_score || 0) - (a.average_score || 0)).map((s, i) => (
                     <tr key={s.id}>
                       <td style={{...tdS,fontFamily:"monospace",fontWeight:700,color:"#1A1F3C"}}>{i+1}</td>
                       <td style={{...tdS,fontWeight:600,color:"#1A1F3C"}}>{s.team_name}</td>

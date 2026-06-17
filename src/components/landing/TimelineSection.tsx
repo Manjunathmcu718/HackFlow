@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import { CalendarDays, UserPlus, Code2, Gavel, Trophy, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
+import type { Hackathon } from "@/mocks/types";
 
 const DEFAULT = [
   { icon: UserPlus,     label: "Registration Opens",  date: "2025-06-15", desc: "Sign up and form your team",            accent: "#3B82F6", bg: "rgba(59,130,246,.1)",  border: "rgba(59,130,246,.2)" },
@@ -11,7 +12,7 @@ const DEFAULT = [
   { icon: Trophy,       label: "Results Announced",    date: "2025-07-16", desc: "Winners revealed at closing ceremony", accent: "#F59E0B", bg: "rgba(245,158,11,.1)", border: "rgba(245,158,11,.2)" },
 ];
 
-export default function TimelineSection({ hackathon }) {
+export default function TimelineSection({ hackathon }: { hackathon?: Hackathon }) {
   const timeline = hackathon ? [
     { icon: UserPlus,     label: "Registration Opens",  date: hackathon.start_date,                          desc: "Sign up and form your team",            accent: "#3B82F6", bg: "rgba(59,130,246,.1)",  border: "rgba(59,130,246,.2)" },
     { icon: CalendarDays, label: "Hackathon Starts",     date: hackathon.start_date,                          desc: "Kick off and start building",           accent: "#10B981", bg: "rgba(16,185,129,.1)", border: "rgba(16,185,129,.2)" },
