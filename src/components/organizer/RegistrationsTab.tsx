@@ -15,7 +15,7 @@ type RegistrationsTabProps = {
 
 export default function RegistrationsTab({ registrations, filteredRegs, searchReg, setSearchReg, exportCSV, thS, tdS }: RegistrationsTabProps) {
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ background:"#fff",border:"1px solid rgba(26,31,60,.09)" }}>
+    <div className="app-card rounded-2xl overflow-hidden" style={{ background:"#fff",border:"1px solid rgba(26,31,60,.09)" }}>
       <div className="p-5 flex items-center justify-between flex-wrap gap-3 border-b" style={{ borderColor:"rgba(26,31,60,.08)" }}>
         <h2 className="font-heading font-bold text-base" style={{ color:"#1A1F3C" }}>Participants ({registrations.length})</h2>
         <div className="flex gap-2">

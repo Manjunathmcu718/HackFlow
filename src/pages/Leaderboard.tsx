@@ -59,7 +59,7 @@ export default function Leaderboard() {
     <PageShell>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
         {/* Header card */}
-        <div className="relative overflow-hidden rounded-3xl mb-10 p-8 sm:p-12 text-center"
+        <div className="dark-hero-panel relative overflow-hidden rounded-3xl mb-10 p-8 sm:p-12 text-center"
           style={{ background:"linear-gradient(135deg,#FFF5EF 0%,#F5F0FF 50%,#F0FAFF 100%)",border:"1px solid rgba(0,0,0,.06)" }}>
           <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
           <div className="absolute top-0 right-0 w-56 h-56 rounded-full pointer-events-none"
@@ -118,7 +118,7 @@ export default function Leaderboard() {
             const rankBg    = i===0?"rgba(245,158,11,.1)":i===1?"rgba(148,163,184,.12)":i===2?"rgba(249,115,22,.1)":"rgba(26,31,60,.05)";
             return (
               <motion.div key={s.id} layout initial={{ opacity:0,y:10 }} animate={{ opacity:1,y:0 }} transition={{ delay:i*.03 }}>
-                <div className="rounded-2xl p-4 flex items-center gap-4"
+                <div className="app-card rounded-2xl p-4 flex items-center gap-4"
                   style={{ background:"#fff",border:i<3?`1.5px solid ${rankColor}40`:"1px solid rgba(26,31,60,.09)",boxShadow:"0 2px 8px rgba(0,0,0,.04)" }}>
                   <span className="w-10 h-10 rounded-xl flex items-center justify-center font-mono font-extrabold text-sm shrink-0"
                     style={{ background:rankBg,color:rankColor }}>#{currentRank}</span>

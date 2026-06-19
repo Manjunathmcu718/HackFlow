@@ -67,7 +67,9 @@ export default function HackathonList() {
 
   return (
     <PageShell>
-      <HackathonListHero hackathons={hackathons} />`r`n`r`n      {recommended.length > 0 && (
+      <HackathonListHero hackathons={hackathons} />
+
+      {recommended.length > 0 && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-10">
           <div className="rounded-3xl p-5 sm:p-6 card-light" style={{ background:"rgba(255,255,255,.92)" }}>
             <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">

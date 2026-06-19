@@ -13,9 +13,9 @@ type OrganizerHeaderProps = {
 export default function OrganizerHeader({ title, stats, tabs, activeTab, setActiveTab, onBroadcast }: OrganizerHeaderProps) {
   return (
     <>
-      <div className="relative overflow-hidden pt-28 pb-12" style={{ background:"linear-gradient(135deg,#FFF5EF 0%,#F5F0FF 50%,#F0F8FF 100%)" }}>
+      <div className="dark-hero-panel relative overflow-hidden pt-28 pb-12" style={{ background:"linear-gradient(135deg,#FFF5EF 0%,#F5F0FF 50%,#F0F8FF 100%)" }}>
         <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="dark-hero-content relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg" style={{ background:"linear-gradient(135deg,#F4622A,#FB923C)",boxShadow:"0 8px 28px rgba(244,98,42,.4)" }}>

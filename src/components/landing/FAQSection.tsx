@@ -47,7 +47,7 @@ export default function FAQSection({ faqs }: FAQSectionProps) {
               <motion.div key={i}
                 initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
                 transition={{ delay: i * 0.07 }}
-                className="rounded-2xl border overflow-hidden"
+                className="app-card rounded-2xl border overflow-hidden"
                 style={{ background: isOpen ? "#FFF8F5" : "#fff", borderColor: isOpen ? "rgba(244,98,42,.3)" : "rgba(0,0,0,.07)", boxShadow: isOpen ? "0 4px 20px rgba(244,98,42,.1)" : "0 1px 3px rgba(0,0,0,.04)" }}>
                 <button onClick={() => setOpenIdx(isOpen ? null : i)}
                   className="w-full flex items-center justify-between gap-4 p-6 text-left"

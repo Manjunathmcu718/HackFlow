@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import ParticipantSidebar from "@/components/participant/ParticipantSidebar";
 
 const LightCard = ({ children, className="", style={} }: { children: ReactNode; className?: string; style?: CSSProperties }) => (
-  <div className={`rounded-2xl ${className}`}
+  <div className={`app-card rounded-2xl ${className}`}
     style={{ background:"#fff",border:"1px solid rgba(26,31,60,.08)",boxShadow:"0 2px 12px rgba(0,0,0,.05)",...style }}>
     {children}
   </div>
@@ -37,9 +37,9 @@ export default function ParticipantDashboard() {
 
   return (
     <PageShell>
-      <div className="relative overflow-hidden pt-28 pb-12" style={{ background:"linear-gradient(135deg,#FFF5EF 0%,#FFFBF0 60%,#F5FFF8 100%)" }}>
+      <div className="dark-hero-panel relative overflow-hidden pt-28 pb-12" style={{ background:"linear-gradient(135deg,#FFF5EF 0%,#FFFBF0 60%,#F5FFF8 100%)" }}>
         <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="dark-hero-content relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
               style={{ background:"linear-gradient(135deg,#F4622A,#FB923C)",boxShadow:"0 8px 28px rgba(244,98,42,.4)" }}>

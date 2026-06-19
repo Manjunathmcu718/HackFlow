@@ -19,7 +19,7 @@ export default function ParticipantSidebar({ hackathon, leaderboardData, myRank,
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl p-5" style={{ background:"linear-gradient(135deg,#FFF5EF,#FFF0FF)",border:"1px solid rgba(244,98,42,.15)" }}>
+      <div className="card-gradient rounded-2xl p-5" style={{ background:"linear-gradient(135deg,#FFF5EF,#FFF0FF)",border:"1px solid rgba(244,98,42,.15)" }}>
         <CountdownTimer targetDate={hackathon?.submission_deadline} label="Submission Deadline" compact />
       </div>
 
