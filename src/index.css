@@ -210,6 +210,31 @@
 [data-theme="dark"] .dark-hero-panel p {
   color: #D6E1F0 !important;
 }
+[data-theme="dark"] .registration-hero {
+  background:
+    radial-gradient(ellipse at 88% 14%, rgba(244,98,42,.18), transparent 34%),
+    radial-gradient(ellipse at 12% 88%, rgba(124,77,255,.16), transparent 40%),
+    linear-gradient(135deg, #0B1424 0%, #111C30 54%, #101827 100%) !important;
+}
+[data-theme="dark"] .registration-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(251,146,60,.2) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: .48;
+}
+[data-theme="dark"] .registration-hero-content {
+  z-index: 1;
+}
+[data-theme="dark"] .registration-hero-title {
+  color: #F8FAFC !important;
+  text-shadow: 0 2px 18px rgba(0,0,0,.25);
+}
+[data-theme="dark"] .registration-hero-subtitle {
+  color: #C9D8EB !important;
+}
 [data-theme="dark"] .card-light:hover {
   border-color: rgba(251,146,60,.42);
   box-shadow: 0 8px 28px rgba(244,98,42,.18), 0 18px 48px rgba(0,0,0,.42);

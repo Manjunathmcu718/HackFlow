@@ -3,7 +3,7 @@ import { api } from "@/lib/mockData";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import PageShell from "@/components/shared/PageShell";
 import CountdownTimer from "@/components/shared/CountdownTimer";
-import { Save, Send, Lock, Check } from "lucide-react";
+import { Save, Send, Lock, Check, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import ProjectSubmissionFields from "@/components/submission/ProjectSubmissionFields";
 
@@ -19,9 +19,13 @@ type ProjectForm = {
 
 export default function SubmitProject() {
   const queryClient = useQueryClient();
-  const { data: hackathons  = [] } = useQuery({ queryKey:["hackathons"],  queryFn:() => api.hackathons.list() });
-  const { data: teams       = [] } = useQuery({ queryKey:["teams"],       queryFn:() => api.teams.list() });
-  const { data: submissions = [] } = useQuery({ queryKey:["submissions"], queryFn:() => api.submissions.list() });
+  const hackathonsQuery = useQuery({ queryKey:["hackathons"],  queryFn:() => api.hackathons.list() });
+  const teamsQuery = useQuery({ queryKey:["teams"], queryFn:() => api.teams.list() });
+  const submissionsQuery = useQuery({ queryKey:["submissions"], queryFn:() => api.submissions.list() });
+  const hackathons = hackathonsQuery.data || [];
+  const teams = teamsQuery.data || [];
+  const submissions = submissionsQuery.data || [];
+  const hasLoadError = hackathonsQuery.isError || teamsQuery.isError || submissionsQuery.isError;
 
   const hackathon      = hackathons.find(h=>h.status==="active") || hackathons[0];
   const team           = teams[0];
@@ -73,10 +77,42 @@ export default function SubmitProject() {
   };
   const removeTech = (t: string) => setForm(prev=>({...prev,tech_stack:prev.tech_stack.filter(x=>x!==t)}));
 
+  const isValidHttpUrl = (value: string) => {
+    try {
+      const url = new URL(value);
+      return url.protocol === "http:" || url.protocol === "https:";
+    } catch {
+      return false;
+    }
+  };
+
+  const validateFinalSubmission = () => {
+    const errors: string[] = [];
+    if (!form.project_title.trim()) errors.push("Project title is required.");
+    if (!form.description.trim()) errors.push("Description is required.");
+    if (!form.demo_url.trim()) errors.push("Demo URL is required.");
+    else if (!isValidHttpUrl(form.demo_url.trim())) errors.push("Demo URL must start with http:// or https://.");
+    if (!form.github_url.trim()) errors.push("GitHub repository URL is required.");
+    else if (!isValidHttpUrl(form.github_url.trim())) errors.push("GitHub URL must start with http:// or https://.");
+    if (!form.pitch_deck_url.trim()) errors.push("Pitch deck PDF is required.");
+    if (form.video_url.trim() && !isValidHttpUrl(form.video_url.trim())) errors.push("Demo video URL must start with http:// or https://.");
+    return errors;
+  };
+
   const handlePitchUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 10*1024*1024) { toast.error("File must be under 10 MB"); return; }
+    const isPdf = file.type === "application/pdf";
+    if (!isPdf) {
+      toast.error("Pitch deck must be a PDF file");
+      e.target.value = "";
+      return;
+    }
+    if (file.size > 10*1024*1024) {
+      toast.error("File must be under 10 MB");
+      e.target.value = "";
+      return;
+    }
     const fakeUrl = `https://mock-storage.beetlex.io/pitch-decks/${Date.now()}-${file.name}`;
     setForm(f=>({...f,pitch_deck_url:fakeUrl}));
     setPitchFileName(file.name);
@@ -85,6 +121,18 @@ export default function SubmitProject() {
 
   const iStyle = { background:"#fff",border:"1px solid rgba(26,31,60,.12)",borderRadius:10,padding:"10px 14px",color:"#1A1F3C",fontSize:14,outline:"none",width:"100%" };
   const cStyle = { background:"#fff",border:"1px solid rgba(26,31,60,.09)",borderRadius:16,padding:24,boxShadow:"0 2px 12px rgba(0,0,0,.04)" };
+
+  if (hasLoadError) return (
+    <PageShell>
+      <div className="max-w-lg mx-auto px-4 py-20 text-center">
+        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background:"rgba(244,63,94,.1)" }}>
+          <AlertTriangle className="w-8 h-8" style={{ color:"#F43F5E" }} aria-hidden="true" />
+        </div>
+        <h1 className="font-heading text-2xl font-bold mb-3" style={{ color:"#1A1F3C" }}>Could Not Load Submission</h1>
+        <p style={{ color:"rgba(26,31,60,.55)" }}>Please refresh and try again.</p>
+      </div>
+    </PageShell>
+  );
 
   if (deadlinePassed && !isSubmitted) return (
     <PageShell>
@@ -129,7 +177,11 @@ export default function SubmitProject() {
               <Save className="w-4 h-4" aria-hidden="true" /> {saveDraft.isPending?"Saving...":"Save Draft"}
             </button>
             <button onClick={()=>{
-              if (!form.project_title.trim()||!form.description.trim()){toast.error("Title and description are required");return;}
+              const validationErrors = validateFinalSubmission();
+              if (validationErrors.length > 0) {
+                toast.error(validationErrors[0]);
+                return;
+              }
               submitFinal.mutate(form);
             }} disabled={submitFinal.isPending}
               className="btn-primary flex items-center gap-2 px-8 py-3 text-sm disabled:opacity-60" aria-label="Submit project">

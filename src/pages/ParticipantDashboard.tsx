@@ -18,10 +18,15 @@ const LightCard = ({ children, className="", style={} }: { children: ReactNode; 
 );
 
 export default function ParticipantDashboard() {
-  const { data: hackathons    = [] } = useQuery({ queryKey:["hackathons"],    queryFn:() => api.hackathons.list() });
-  const { data: teams         = [] } = useQuery({ queryKey:["teams"],         queryFn:() => api.teams.list() });
-  const { data: submissions   = [] } = useQuery({ queryKey:["submissions"],   queryFn:() => api.submissions.list() });
-  const { data: announcements = [] } = useQuery({ queryKey:["announcements"], queryFn:() => api.announcements.list() });
+  const hackathonsQuery = useQuery({ queryKey:["hackathons"], queryFn:() => api.hackathons.list() });
+  const teamsQuery = useQuery({ queryKey:["teams"], queryFn:() => api.teams.list() });
+  const submissionsQuery = useQuery({ queryKey:["submissions"], queryFn:() => api.submissions.list() });
+  const announcementsQuery = useQuery({ queryKey:["announcements"], queryFn:() => api.announcements.list() });
+  const hackathons = hackathonsQuery.data || [];
+  const teams = teamsQuery.data || [];
+  const submissions = submissionsQuery.data || [];
+  const announcements = announcementsQuery.data || [];
+  const hasLoadError = hackathonsQuery.isError || teamsQuery.isError || submissionsQuery.isError || announcementsQuery.isError;
 
   const hackathon      = hackathons.find(h => h.status==="active") || hackathons[0];
   const team           = teams[0];
@@ -34,6 +39,15 @@ export default function ParticipantDashboard() {
   const leaderboardData = submissions.filter(s=>s.status==="submitted"&&s.average_score>0).sort((a,b)=>b.average_score-a.average_score);
   const myRank = leaderboardData.findIndex(s=>s.team_id===team?.id)+1;
 
+  if (hasLoadError) return (
+    <PageShell>
+      <div className="max-w-lg mx-auto px-4 py-20 text-center">
+        <AlertTriangle className="w-10 h-10 mx-auto mb-4" style={{ color:"#F43F5E" }} aria-hidden="true" />
+        <h1 className="font-heading text-2xl font-bold mb-3" style={{ color:"#1A1F3C" }}>Could Not Load Dashboard</h1>
+        <p style={{ color:"rgba(26,31,60,.55)" }}>Please refresh and try again.</p>
+      </div>
+    </PageShell>
+  );
 
   return (
     <PageShell>

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { api } from "@/lib/mockData";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import PageShell from "@/components/shared/PageShell";
-import { ExternalLink, Github, FileText, Film, Check, ArrowLeft } from "lucide-react";
+import { ExternalLink, Github, FileText, Film, Check, ArrowLeft, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import JudgePanelHero from "@/components/judge/JudgePanelHero";
@@ -29,7 +29,8 @@ export default function JudgePanel() {
   const [scores, setScores]           = useState<ScoreMap>({ innovation:5, technical:5, impact:5, presentation:5 });
   const [comments, setComments]       = useState("");
 
-  const { data: submissions = [] } = useQuery<Submission[]>({ queryKey:["submissions"], queryFn:() => api.submissions.list() as Promise<Submission[]> });
+  const submissionsQuery = useQuery<Submission[]>({ queryKey:["submissions"], queryFn:() => api.submissions.list() as Promise<Submission[]> });
+  const submissions = submissionsQuery.data || [];
 
   const submitted  = submissions.filter((s: Submission) => s.status==="submitted");
   const myScored   = submitted.filter((s: Submission) => s.scores?.length>0);
@@ -56,6 +57,16 @@ export default function JudgePanel() {
   });
 
   const iStyle = { background:"#F8F7FF",border:"1.5px solid rgba(26,31,60,.14)",borderRadius:12,padding:"10px 14px",color:"#1A1F3C",fontSize:14,outline:"none",width:"100%",minHeight:80,resize:"vertical" as const };
+
+  if (submissionsQuery.isError) return (
+    <PageShell>
+      <div className="max-w-lg mx-auto px-4 py-20 text-center">
+        <AlertTriangle className="w-10 h-10 mx-auto mb-4" style={{ color:"#F43F5E" }} aria-hidden="true" />
+        <h1 className="font-heading text-2xl font-bold mb-3" style={{ color:"#1A1F3C" }}>Could Not Load Judge Queue</h1>
+        <p style={{ color:"rgba(26,31,60,.55)" }}>Please refresh and try again.</p>
+      </div>
+    </PageShell>
+  );
 
   return (
     <PageShell>

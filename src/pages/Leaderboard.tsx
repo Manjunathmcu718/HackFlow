@@ -2,20 +2,22 @@
 import { api } from "@/lib/mockData";
 import { useQuery } from "@tanstack/react-query";
 import PageShell from "@/components/shared/PageShell";
-import { Trophy, Medal, Star, ExternalLink, Github, Lock } from "lucide-react";
+import { Trophy, Medal, Star, ExternalLink, Github, Lock, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Hackathon, Submission } from "@/mocks/types";
 
 export default function Leaderboard() {
   const [trackFilter, setTrackFilter] = useState("all");
   const previousRanksRef = useRef<Map<string, number>>(new Map());
-  const { data: hackathons = [] } = useQuery<Hackathon[]>({ queryKey:["hackathons"], queryFn:() => api.hackathons.list() as Promise<Hackathon[]> });
-  const { data: submissions = [] } = useQuery<Submission[]>({
+  const hackathonsQuery = useQuery<Hackathon[]>({ queryKey:["hackathons"], queryFn:() => api.hackathons.list() as Promise<Hackathon[]> });
+  const submissionsQuery = useQuery<Submission[]>({
     queryKey:["submissions"],
     queryFn:() => api.submissions.list() as Promise<Submission[]>,
     refetchInterval: 15000,
     refetchOnWindowFocus: true,
   });
+  const hackathons = hackathonsQuery.data || [];
+  const submissions = submissionsQuery.data || [];
 
   const hackathon = hackathons.find((h: Hackathon) => h.status==="active") || hackathons[0];
 
@@ -34,6 +36,16 @@ export default function Leaderboard() {
   useEffect(() => {
     previousRanksRef.current = new Map(ranked.map((submission: Submission, index: number) => [submission.id, index + 1]));
   }, [ranked]);
+
+  if (hackathonsQuery.isError || submissionsQuery.isError) return (
+    <PageShell>
+      <div className="max-w-lg mx-auto px-4 py-20 text-center">
+        <AlertTriangle className="w-10 h-10 mx-auto mb-4" style={{ color:"#F43F5E" }} aria-hidden="true" />
+        <h1 className="font-heading text-2xl font-bold mb-3" style={{ color:"#1A1F3C" }}>Could Not Load Leaderboard</h1>
+        <p style={{ color:"rgba(26,31,60,.55)" }}>Please refresh and try again.</p>
+      </div>
+    </PageShell>
+  );
 
   if (!hackathon?.leaderboard_published) return (
     <PageShell>

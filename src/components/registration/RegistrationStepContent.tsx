@@ -55,24 +55,45 @@ export default function RegistrationStepContent({ step, form, errors, activeHack
   if (step === 1) {
     return (
       <div className="space-y-4">
-        {([
-          { val:"create", label:"Create a New Team", sub:"Start a team and invite others" },
-          { val:"join", label:"Join Existing Team", sub:"Enter an invite code from your team lead" },
-        ] as const).map(opt => (
-          <div key={opt.val} onClick={() => update("team_action",opt.val)}
-            className="flex items-center gap-4 p-4 rounded-2xl cursor-pointer"
-            style={{ border:`2px solid ${form.team_action===opt.val?"#F4622A":"rgba(26,31,60,.1)"}`,background:form.team_action===opt.val?"rgba(244,98,42,.05)":"#fff" }}
-            role="radio" aria-checked={form.team_action===opt.val} tabIndex={0}
-            onKeyDown={e => e.key===" "&&update("team_action",opt.val)}>
-            <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0" style={{ borderColor:form.team_action===opt.val?"#F4622A":"rgba(26,31,60,.2)" }}>
-              {form.team_action===opt.val&&<div className="w-2.5 h-2.5 rounded-full" style={{ background:"#F4622A" }} />}
-            </div>
-            <div>
-              <p className="font-bold text-sm" style={{ color:"#1A1F3C" }}>{opt.label}</p>
-              <p className="text-xs mt-0.5" style={{ color:"rgba(26,31,60,.5)" }}>{opt.sub}</p>
-            </div>
-          </div>
-        ))}
+        <fieldset className="space-y-4">
+          <legend className="sr-only">Team setup</legend>
+          {([
+            { val:"create", label:"Create a New Team", sub:"Start a team and invite others" },
+            { val:"join", label:"Join Existing Team", sub:"Enter an invite code from your team lead" },
+          ] as const).map(opt => {
+            const selected = form.team_action === opt.val;
+            return (
+              <div key={opt.val}>
+                <input
+                  id={`team-action-${opt.val}`}
+                  type="radio"
+                  name="team_action"
+                  value={opt.val}
+                  checked={selected}
+                  onChange={() => update("team_action", opt.val)}
+                  className="sr-only peer"
+                />
+                <label
+                  htmlFor={`team-action-${opt.val}`}
+                  className="flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2"
+                  style={{
+                    border:`2px solid ${selected?"#F4622A":"rgba(26,31,60,.1)"}`,
+                    background:selected?"rgba(244,98,42,.05)":"#fff",
+                    outlineColor:"#F4622A",
+                  }}
+                >
+                  <span className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0" style={{ borderColor:selected?"#F4622A":"rgba(26,31,60,.2)" }}>
+                    {selected&&<span className="w-2.5 h-2.5 rounded-full" style={{ background:"#F4622A" }} />}
+                  </span>
+                  <span>
+                    <span className="block font-bold text-sm" style={{ color:"#1A1F3C" }}>{opt.label}</span>
+                    <span className="block text-xs mt-0.5" style={{ color:"rgba(26,31,60,.5)" }}>{opt.sub}</span>
+                  </span>
+                </label>
+              </div>
+            );
+          })}
+        </fieldset>
         {form.team_action==="create" && <div><FL htmlFor="tname">Team Name *</FL><FI id="tname" value={form.team_name} onChange={e=>update("team_name",e.target.value)} placeholder="ChainBreakers" /><Err field="team_name" /></div>}
         {form.team_action==="join" && <div><FL htmlFor="icode">Invite Code *</FL><FI id="icode" value={form.invite_code} onChange={e=>update("invite_code",e.target.value)} placeholder="CB-2025-X7K" className="font-mono" /><Err field="invite_code" /></div>}
       </div>
@@ -82,21 +103,43 @@ export default function RegistrationStepContent({ step, form, errors, activeHack
   if (step === 2) {
     return (
       <div>
-        <FL htmlFor="track-select">Select a Technology Track *</FL>
-        <div className="space-y-3 mt-2" role="radiogroup" aria-labelledby="track-select">
-          {(activeHackathon?.tracks||[]).map(t => (
-            <div key={t.name} onClick={() => update("track",t.name)}
-              className="p-4 rounded-2xl cursor-pointer"
-              style={{ border:`2px solid ${form.track===t.name?"#F4622A":"rgba(26,31,60,.1)"}`,background:form.track===t.name?"rgba(244,98,42,.05)":"#fff" }}
-              role="radio" aria-checked={form.track===t.name} tabIndex={0}
-              onKeyDown={e => e.key===" "&&update("track",t.name)}>
-              <div className="flex justify-between items-start">
-                <div><p className="font-bold text-sm" style={{ color:"#1A1F3C" }}>{t.name}</p><p className="text-xs mt-0.5" style={{ color:"rgba(26,31,60,.5)" }}>{t.description}</p></div>
-                <span className="font-mono text-sm font-extrabold" style={{ color:"#F4622A" }}>{t.prize}</span>
+        <fieldset className="space-y-3 mt-2">
+          <legend className="block text-sm font-bold mb-2" style={{ color:"#1A1F3C" }}>Select a Technology Track *</legend>
+          {(activeHackathon?.tracks||[]).map(t => {
+            const selected = form.track === t.name;
+            const id = `track-${t.name.replace(/\W+/g, "-").toLowerCase()}`;
+            return (
+              <div key={t.name}>
+                <input
+                  id={id}
+                  type="radio"
+                  name="track"
+                  value={t.name}
+                  checked={selected}
+                  onChange={() => update("track", t.name)}
+                  className="sr-only peer"
+                />
+                <label
+                  htmlFor={id}
+                  className="block p-4 rounded-2xl cursor-pointer transition-all peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2"
+                  style={{
+                    border:`2px solid ${selected?"#F4622A":"rgba(26,31,60,.1)"}`,
+                    background:selected?"rgba(244,98,42,.05)":"#fff",
+                    outlineColor:"#F4622A",
+                  }}
+                >
+                  <span className="flex justify-between items-start gap-4">
+                    <span>
+                      <span className="block font-bold text-sm" style={{ color:"#1A1F3C" }}>{t.name}</span>
+                      <span className="block text-xs mt-0.5" style={{ color:"rgba(26,31,60,.5)" }}>{t.description}</span>
+                    </span>
+                    <span className="font-mono text-sm font-extrabold" style={{ color:"#F4622A" }}>{t.prize}</span>
+                  </span>
+                </label>
               </div>
-            </div>
-          ))}
-        </div>
+            );
+          })}
+        </fieldset>
         <Err field="track" />
       </div>
     );

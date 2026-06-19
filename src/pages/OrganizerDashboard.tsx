@@ -3,7 +3,7 @@ import { api } from "@/lib/mockData";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import PageShell from "@/components/shared/PageShell";
 import StatusBadge from "@/components/shared/StatusBadge";
-import { Users, FileText, Gavel, Trophy, Megaphone, Search, Eye, EyeOff } from "lucide-react";
+import { Users, FileText, Gavel, Trophy, Megaphone, Search, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import type { AnnouncementPriority, Hackathon, Registration, Submission } from "@/mocks/types";
@@ -21,11 +21,17 @@ export default function OrganizerDashboard() {
   const [leaderboardPublished, setPublished] = useState(true);
   const [activeTab, setActiveTab] = useState("registrations");
 
-  const { data: hackathons = [] } = useQuery<Hackathon[]>({ queryKey: ["hackathons"], queryFn: () => api.hackathons.list() as Promise<Hackathon[]> });
-  const { data: registrations = [] } = useQuery<Registration[]>({ queryKey: ["registrations"], queryFn: () => api.registrations.list() as Promise<Registration[]> });
-  const { data: teams = [] } = useQuery<{ id: string }[]>({ queryKey: ["teams"], queryFn: () => api.teams.list() as Promise<{ id: string }[]> });
-  const { data: submissions = [] } = useQuery<Submission[]>({ queryKey: ["submissions"], queryFn: () => api.submissions.list() as Promise<Submission[]> });
-  const { data: announcements = [] } = useQuery({ queryKey: ["announcements"], queryFn: () => api.announcements.list() as Promise<import("@/mocks/types").Announcement[]> });
+  const hackathonsQuery = useQuery<Hackathon[]>({ queryKey: ["hackathons"], queryFn: () => api.hackathons.list() as Promise<Hackathon[]> });
+  const registrationsQuery = useQuery<Registration[]>({ queryKey: ["registrations"], queryFn: () => api.registrations.list() as Promise<Registration[]> });
+  const teamsQuery = useQuery<{ id: string }[]>({ queryKey: ["teams"], queryFn: () => api.teams.list() as Promise<{ id: string }[]> });
+  const submissionsQuery = useQuery<Submission[]>({ queryKey: ["submissions"], queryFn: () => api.submissions.list() as Promise<Submission[]> });
+  const announcementsQuery = useQuery({ queryKey: ["announcements"], queryFn: () => api.announcements.list() as Promise<import("@/mocks/types").Announcement[]> });
+  const hackathons = hackathonsQuery.data || [];
+  const registrations = registrationsQuery.data || [];
+  const teams = teamsQuery.data || [];
+  const submissions = submissionsQuery.data || [];
+  const announcements = announcementsQuery.data || [];
+  const hasLoadError = hackathonsQuery.isError || registrationsQuery.isError || teamsQuery.isError || submissionsQuery.isError || announcementsQuery.isError;
 
   const hackathon = hackathons.find(h=>h.status==="active") || hackathons[0];
 
@@ -61,6 +67,16 @@ export default function OrganizerDashboard() {
   const tdS: CSSProperties = { padding: "12px 14px", fontSize: 13, borderBottom: "1px solid rgba(26,31,60,.05)" };
 
   const TABS = ["registrations","submissions","leaderboard","announcements","judges"];
+
+  if (hasLoadError) return (
+    <PageShell>
+      <div className="max-w-lg mx-auto px-4 py-20 text-center">
+        <AlertTriangle className="w-10 h-10 mx-auto mb-4" style={{ color:"#F43F5E" }} aria-hidden="true" />
+        <h1 className="font-heading text-2xl font-bold mb-3" style={{ color:"#1A1F3C" }}>Could Not Load Organizer Data</h1>
+        <p style={{ color:"rgba(26,31,60,.55)" }}>Please refresh and try again.</p>
+      </div>
+    </PageShell>
+  );
 
   return (
     <PageShell>

@@ -81,21 +81,21 @@ export default function ProjectSubmissionFields({
         <div className="space-y-4">
           <div>
             <label htmlFor="demo-url" className="block text-sm font-semibold mb-1.5 flex items-center gap-1.5" style={{ color:"#1A1F3C" }}>
-              <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" /> Demo URL
+              <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" /> Demo URL *
             </label>
-            <input id="demo-url" style={iStyle} value={form.demo_url} onChange={e=>setForm(f=>({...f,demo_url:e.target.value}))} placeholder="https://your-demo.com" type="url" />
+            <input id="demo-url" style={iStyle} value={form.demo_url} onChange={e=>setForm(f=>({...f,demo_url:e.target.value}))} placeholder="https://your-demo.com" type="url" aria-required="true" />
           </div>
           <div>
             <label htmlFor="github-url" className="block text-sm font-semibold mb-1.5 flex items-center gap-1.5" style={{ color:"#1A1F3C" }}>
-              <Github className="w-3.5 h-3.5" aria-hidden="true" /> GitHub Repository
+              <Github className="w-3.5 h-3.5" aria-hidden="true" /> GitHub Repository *
             </label>
-            <input id="github-url" style={iStyle} value={form.github_url} onChange={e=>setForm(f=>({...f,github_url:e.target.value}))} placeholder="https://github.com/..." type="url" />
+            <input id="github-url" style={iStyle} value={form.github_url} onChange={e=>setForm(f=>({...f,github_url:e.target.value}))} placeholder="https://github.com/..." type="url" aria-required="true" />
           </div>
           <div>
             <label htmlFor="pitch-file" className="block text-sm font-semibold mb-1.5 flex items-center gap-1.5" style={{ color:"#1A1F3C" }}>
-              <FileText className="w-3.5 h-3.5" aria-hidden="true" /> Pitch Deck (PDF, max 10 MB)
+              <FileText className="w-3.5 h-3.5" aria-hidden="true" /> Pitch Deck (PDF, max 10 MB) *
             </label>
-            <input id="pitch-file" type="file" accept=".pdf" onChange={handlePitchUpload} aria-describedby="pitch-hint" className="w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer" />
+            <input id="pitch-file" type="file" accept="application/pdf,.pdf" onChange={handlePitchUpload} aria-describedby="pitch-hint" aria-required="true" className="w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer" />
             <span id="pitch-hint" className="text-xs" style={{ color:"rgba(26,31,60,.4)" }}>PDF only, max 10 MB</span>
             {pitchFileName && <p className="mt-2 text-xs flex items-center gap-1.5" style={{ color:"#10B981" }}><FileText className="w-3 h-3" aria-hidden="true" /> {pitchFileName} - ready</p>}
           </div>
